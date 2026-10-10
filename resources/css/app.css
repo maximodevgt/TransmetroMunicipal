@@ -1,0 +1,75 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Paleta celeste del Transmetro */
+    --color-celeste-50: #f0f9ff;
+    --color-celeste-100: #e0f2fe;
+    --color-celeste-200: #bae6fd;
+    --color-celeste-300: #7dd3fc;
+    --color-celeste-400: #38bdf8;
+    --color-celeste-500: #0ea5e9;
+    --color-celeste-600: #0284c7;
+    --color-celeste-700: #0369a1;
+    --color-celeste-800: #075985;
+    --color-celeste-900: #0c4a6e;
+}
+
+@utility btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-celeste-400 focus-visible:ring-offset-2 disabled:opacity-50;
+}
+
+@layer components {
+    .tarjeta {
+        @apply rounded-2xl bg-white shadow-sm ring-1 ring-celeste-100;
+    }
+
+    .btn-primario {
+        @apply btn bg-celeste-500 text-white shadow-sm shadow-celeste-200 hover:bg-celeste-600;
+    }
+
+    .btn-secundario {
+        @apply btn bg-white text-celeste-700 ring-1 ring-celeste-200 hover:bg-celeste-50;
+    }
+
+    .btn-peligro {
+        @apply btn bg-white text-rose-600 ring-1 ring-rose-200 hover:bg-rose-50;
+    }
+
+    .etiqueta {
+        @apply mb-1 block text-sm font-medium text-slate-700;
+    }
+
+    .campo {
+        @apply block w-full rounded-xl border-0 bg-white px-3 py-2 text-sm text-slate-800 ring-1 ring-celeste-200 placeholder:text-slate-400 focus:ring-2 focus:ring-celeste-400 focus:outline-none;
+    }
+
+    .campo-error {
+        @apply mt-1 text-xs text-rose-600;
+    }
+
+    .insignia {
+        @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+    }
+
+    .tabla {
+        @apply w-full text-left text-sm;
+    }
+
+    .tabla thead th {
+        @apply bg-celeste-50 px-4 py-3 text-xs font-semibold tracking-wide text-celeste-800 uppercase;
+    }
+
+    .tabla tbody td {
+        @apply border-t border-celeste-50 px-4 py-3 text-slate-700;
+    }
+
+    .tabla tbody tr {
+        @apply hover:bg-celeste-50/50;
+    }
+}
