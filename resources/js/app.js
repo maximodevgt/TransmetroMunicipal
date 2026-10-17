@@ -1,5 +1,6 @@
 import './notificaciones';
 import './confirmacion';
+import './atender';
 import './alertas';
 
 // Menú lateral en pantallas pequeñas.

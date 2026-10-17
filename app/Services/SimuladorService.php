@@ -42,7 +42,16 @@ class SimuladorService
     public const SEPARACION_SALIDAS_SEG = 20;
 
     /** Probabilidad, en cada avance, de registrar pasajeros en espera en alguna estación. */
-    public const PROBABILIDAD_ESPERA = 0.2;
+    public const PROBABILIDAD_ESPERA = 0.15;
+
+    /** De esos registros de espera, cuántos son de alta demanda (≥ 150 %): una cada 2 o 3 minutos en promedio. */
+    public const PROBABILIDAD_ALTA_DEMANDA = 0.15;
+
+    /**
+     * Probabilidad de que un bus llegue con menos del 25 % de ocupación. Incluso en el peor caso
+     * (tramos y paradas mínimas) da menos de una alerta de baja ocupación por minuto con 6 buses.
+     */
+    public const PROBABILIDAD_BAJA_OCUPACION = 0.025;
 
     /** Segundos mínimos entre dos avances (varias pestañas pueden pedirlo a la vez). */
     public const INTERVALO_MINIMO_SEG = 2.5;
@@ -183,7 +192,7 @@ class SimuladorService
 
         $ultima = $recorrido->linea->estaciones->last()?->id === $estacion->id;
         try {
-            [$visita] = $this->recorridos->registrarLlegada($recorrido, $estacion, $this->pasajerosAlLlegar($recorrido->bus, $ultima));
+            [$visita] = $this->recorridos->registrarLlegada($recorrido, $estacion, self::pasajerosAlLlegar($recorrido->bus->capacidad_maxima, $ultima));
         } catch (ReglaNegocioException) {
             // Alguien registró la llegada a mano: en el siguiente paso se rehace el horario.
             unset($estado['tramos'][$recorrido->id]);
@@ -276,9 +285,9 @@ class SimuladorService
 
         $estacion = $estaciones->random();
         $referencia = $this->alertas->capacidadReferencia($estacion)[0] ?? 100;
-        $cantidad = mt_rand(1, 100) <= 25
+        $cantidad = mt_rand() / mt_getrandmax() < self::PROBABILIDAD_ALTA_DEMANDA
             ? mt_rand((int) ceil($referencia * AlertaService::ALTA_DEMANDA), (int) ceil($referencia * 2.2))
-            : mt_rand(5, $referencia);
+            : mt_rand(5, (int) floor($referencia * 1.2));
 
         // Lo registra el operador de la estación (o el administrador si no tiene).
         $operador = User::where('estacion_id', $estacion->id)->where('activo', true)->first() ?? Auth::user();
@@ -286,19 +295,34 @@ class SimuladorService
     }
 
     /**
-     * Pasajeros realistas: casi siempre entre 35 % y 95 %, a veces muy pocos (baja ocupación)
-     * y casi vacío al llegar a la terminal.
+     * Pasajeros realistas: casi siempre entre 35 % y 95 % de la capacidad, rara vez muy pocos
+     * (baja ocupación) y casi vacío al llegar a la terminal, donde no se revisa la ocupación.
      */
-    private function pasajerosAlLlegar(Bus $bus, bool $ultimaEstacion): int
+    public static function pasajerosAlLlegar(int $capacidad, bool $ultimaEstacion): int
     {
-        $capacidad = $bus->capacidad_maxima;
         if ($ultimaEstacion) {
             return mt_rand(0, (int) floor($capacidad * 0.1));
         }
 
-        return mt_rand(1, 100) <= 15
+        return mt_rand() / mt_getrandmax() < self::PROBABILIDAD_BAJA_OCUPACION
             ? mt_rand((int) ceil($capacidad * 0.05), (int) floor($capacidad * 0.24))
             : mt_rand((int) ceil($capacidad * 0.35), (int) floor($capacidad * 0.95));
+    }
+
+    /**
+     * Alertas esperadas por minuto con $buses en ruta, en el peor caso (llegadas lo más seguidas posible).
+     *
+     * @return array{baja_ocupacion: float, alta_demanda: float}
+     */
+    public static function alertasPorMinuto(int $buses): array
+    {
+        $llegadasPorMinuto = $buses * 60 / (self::PARADA_SEG + self::TRAMO_MINIMO_SEG);
+        $avancesPorMinuto = 60 / 3;
+
+        return [
+            'baja_ocupacion' => $llegadasPorMinuto * self::PROBABILIDAD_BAJA_OCUPACION,
+            'alta_demanda' => $avancesPorMinuto * self::PROBABILIDAD_ESPERA * self::PROBABILIDAD_ALTA_DEMANDA,
+        ];
     }
 
     private function finalizar(Recorrido $recorrido): void
