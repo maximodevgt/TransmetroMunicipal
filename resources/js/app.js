@@ -2,6 +2,8 @@ import './notificaciones';
 import './confirmacion';
 import './atender';
 import './alertas';
+import './recargas';
+import './torniquete';
 
 // Menú lateral en pantallas pequeñas.
 const menu = document.querySelector('[data-menu]');

@@ -5,6 +5,7 @@ use App\Http\Controllers\AlertaController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BitacoraController;
 use App\Http\Controllers\BusController;
+use App\Http\Controllers\ConsultaSaldoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EstacionController;
 use App\Http\Controllers\GuardiaController;
@@ -14,20 +15,30 @@ use App\Http\Controllers\LineaEstacionController;
 use App\Http\Controllers\MiEstacionController;
 use App\Http\Controllers\ParqueoController;
 use App\Http\Controllers\PilotoController;
+use App\Http\Controllers\RecargaController;
 use App\Http\Controllers\RecorridoController;
 use App\Http\Controllers\SeguimientoController;
+use App\Http\Controllers\TarjetaController;
+use App\Http\Controllers\TorniqueteController;
+use App\Http\Controllers\TransaccionController;
 use App\Http\Controllers\UsuarioController;
 use Illuminate\Support\Facades\Route;
+
+// Consulta pública de saldo (sin sesión), con límite de intentos.
+Route::get('/consulta-saldo', [ConsultaSaldoController::class, 'show'])->name('consulta-saldo');
+Route::post('/consulta-saldo', [ConsultaSaldoController::class, 'consultar'])->middleware('throttle:consulta-saldo')->name('consulta-saldo.consultar');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'create'])->name('login');
     Route::post('/login', [AuthController::class, 'store'])->middleware('throttle:6,1');
 });
 
+// Cada límite de intentos lleva su propio prefijo: sin él, Laravel cuenta todas las rutas del usuario juntas
+// y el sondeo de alertas y del mapa agotaría el cupo de las recargas.
 Route::middleware(['auth', 'activo'])->group(function () {
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
     Route::get('/', DashboardController::class)->name('dashboard');
-    Route::get('/alertas/nuevas', [AlertaController::class, 'nuevas'])->middleware('throttle:60,1')->name('alertas.nuevas');
+    Route::get('/alertas/nuevas', [AlertaController::class, 'nuevas'])->middleware('throttle:60,1,alertas')->name('alertas.nuevas');
 
     // Lectura para todos los roles; crear, editar y eliminar solo administrador (ver middleware() de cada controlador).
     Route::resource('lineas', LineaController::class)->parameters(['lineas' => 'linea']);
@@ -44,9 +55,22 @@ Route::middleware(['auth', 'activo'])->group(function () {
 
     // Seguimiento en vivo: el mapa consulta los datos cada 3 s y avanza la simulación si está activa.
     Route::get('seguimiento', [SeguimientoController::class, 'index'])->name('seguimiento.index');
-    Route::get('seguimiento/datos', [SeguimientoController::class, 'datos'])->middleware('throttle:120,1')->name('seguimiento.datos');
-    Route::post('seguimiento/avanzar', [SeguimientoController::class, 'avanzar'])->middleware('throttle:120,1')->name('seguimiento.avanzar');
+    Route::get('seguimiento/datos', [SeguimientoController::class, 'datos'])->middleware('throttle:120,1,seguimiento-datos')->name('seguimiento.datos');
+    Route::post('seguimiento/avanzar', [SeguimientoController::class, 'avanzar'])->middleware('throttle:120,1,seguimiento-avanzar')->name('seguimiento.avanzar');
     Route::post('seguimiento/simulacion', [SeguimientoController::class, 'simulacion'])->middleware('rol:administrador')->name('seguimiento.simulacion');
+
+    // Tarjeta Transmetro (ambos roles). Pagos SIMULADOS; el saldo lo calculan los triggers.
+    Route::resource('tarjetas', TarjetaController::class)->only(['index', 'create', 'store', 'show'])->parameters(['tarjetas' => 'tarjeta']);
+    Route::patch('tarjetas/{tarjeta}/bloquear', [TarjetaController::class, 'bloquear'])->name('tarjetas.bloquear');
+    Route::patch('tarjetas/{tarjeta}/desbloquear', [TarjetaController::class, 'desbloquear'])->name('tarjetas.desbloquear');
+    Route::get('tarjetas/{tarjeta}/recargar', [RecargaController::class, 'create'])->name('recargas.create');
+    Route::post('tarjetas/{tarjeta}/recargas/efectivo', [RecargaController::class, 'efectivo'])->middleware('rol:operador')->name('recargas.efectivo');
+    Route::post('tarjetas/{tarjeta}/recargas/en-linea', [RecargaController::class, 'enLinea'])->middleware('throttle:20,1,recargas')->name('recargas.en-linea');
+    Route::get('transacciones', [TransaccionController::class, 'index'])->name('transacciones.index');
+    Route::get('transacciones/{transaccion}', [TransaccionController::class, 'show'])->name('transacciones.show');
+    Route::get('torniquete', [TorniqueteController::class, 'index'])->name('torniquete.index');
+    Route::get('torniquete/{acceso}', [TorniqueteController::class, 'show'])->name('torniquete.show');
+    Route::post('torniquete/{acceso}/validar', [TorniqueteController::class, 'validar'])->middleware('throttle:120,1,torniquete')->name('torniquete.validar');
 
     // Alertas: el operador solo ve y atiende las de su estación (lo revisa el controlador).
     Route::get('alertas', [AlertaController::class, 'index'])->name('alertas.index');

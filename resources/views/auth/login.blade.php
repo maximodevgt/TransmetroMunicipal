@@ -55,6 +55,10 @@
 
                     <button class="btn-primario w-full py-2.5">Iniciar sesión</button>
                 </form>
+                <p class="mt-6 text-center text-sm text-slate-500">
+                    ¿Tiene una Tarjeta Transmetro?
+                    <a href="{{ route('consulta-saldo') }}" class="font-semibold text-celeste-600 hover:underline">Consulte su saldo</a>
+                </p>
             </div>
         </section>
     </div>

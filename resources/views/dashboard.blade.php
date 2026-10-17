@@ -28,6 +28,30 @@
         @endforeach
     </div>
 
+    {{-- Caja de hoy: recaudación y pagos rechazados, hacia la lista de movimientos filtrada --}}
+    <div class="mt-4 grid gap-4 sm:grid-cols-2">
+        <a href="{{ route('transacciones.index', ['periodo' => 'hoy', 'estado' => 'aprobada']) }}" class="tarjeta clicable flex items-center gap-4 p-5" data-caja="recaudacion">
+            <div class="flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-300 to-emerald-500 text-white shadow-sm">
+                <x-icono nombre="movimientos" class="size-6" />
+            </div>
+            <div>
+                <p class="text-sm text-slate-500">Recaudación de hoy</p>
+                <p class="text-2xl font-bold text-celeste-900 tabular-nums">Q{{ number_format($caja['recargas'], 2) }} <span class="text-sm font-normal text-slate-500">en recargas</span></p>
+                <p class="text-sm text-slate-600">{{ $caja['cantidad_pasajes'] }} {{ $caja['cantidad_pasajes'] == 1 ? 'pasaje' : 'pasajes' }} · Q{{ number_format($caja['pasajes'], 2) }}</p>
+            </div>
+        </a>
+        <a href="{{ route('transacciones.index', ['periodo' => 'hoy', 'estado' => 'rechazada']) }}" class="tarjeta clicable flex items-center gap-4 p-5" data-caja="rechazados">
+            <div @class(['flex size-12 items-center justify-center rounded-2xl text-white shadow-sm', 'bg-gradient-to-br from-rose-300 to-rose-500' => $caja['rechazados'] > 0, 'bg-gradient-to-br from-slate-300 to-slate-400' => $caja['rechazados'] === 0])>
+                <x-icono nombre="error" class="size-6" />
+            </div>
+            <div>
+                <p class="text-sm text-slate-500">Pagos rechazados hoy</p>
+                <p class="text-2xl font-bold text-celeste-900 tabular-nums">{{ $caja['rechazados'] }}</p>
+                <p class="text-sm text-slate-600">Recargas y pasajes no aprobados</p>
+            </div>
+        </a>
+    </div>
+
     {{-- Mini mapa con los buses en ruta --}}
     <section class="tarjeta mt-6 overflow-hidden">
         <div class="flex flex-wrap items-center justify-between gap-2 px-5 py-4">

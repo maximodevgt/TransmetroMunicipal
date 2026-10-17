@@ -3,7 +3,7 @@
         class="confirmacion m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl bg-white p-0 text-slate-800 shadow-2xl backdrop:bg-celeste-900/40 backdrop:backdrop-blur-sm">
     <form method="dialog" class="p-6">
         <div class="flex items-start gap-4">
-            <span class="flex size-12 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-600">
+            <span data-confirmacion-icono class="flex size-12 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-600">
                 <x-icono nombre="advertencia" class="size-6" />
             </span>
             <div class="min-w-0 pt-1">

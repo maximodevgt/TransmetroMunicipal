@@ -13,6 +13,11 @@
         'finalizado' => 'bg-slate-100 text-slate-600',
         'cancelado' => 'bg-rose-100 text-rose-700',
         'atendida' => 'bg-slate-100 text-slate-600',
+        'bloqueada' => 'bg-rose-100 text-rose-700',
+        'suspendida' => 'bg-amber-100 text-amber-800',
+        'vencida' => 'bg-slate-100 text-slate-500',
+        'aprobada' => 'bg-emerald-100 text-emerald-700',
+        'rechazada' => 'bg-rose-100 text-rose-700',
     ];
 @endphp
 

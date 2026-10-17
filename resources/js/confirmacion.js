@@ -4,14 +4,24 @@ const dialogo = document.querySelector('[data-confirmacion]');
 /**
  * Abre la ventana y resuelve true si el usuario acepta.
  */
-export function confirmar({ titulo = '¿Está seguro?', mensaje = '', boton = 'Sí, eliminar' } = {}) {
+export function confirmar({ titulo = '¿Está seguro?', mensaje = '', boton = 'Sí, eliminar', tipo = 'peligro' } = {}) {
     if (!dialogo) {
         return Promise.resolve(window.confirm([titulo, mensaje].filter(Boolean).join('\n')));
     }
 
     dialogo.querySelector('[data-confirmacion-titulo]').textContent = titulo;
     dialogo.querySelector('[data-confirmacion-mensaje]').textContent = mensaje;
-    dialogo.querySelector('[data-confirmacion-aceptar]').textContent = boton;
+    const aceptar = dialogo.querySelector('[data-confirmacion-aceptar]');
+    aceptar.textContent = boton;
+    // 'peligro' (rojo) para eliminar; 'normal' (celeste) para confirmar operaciones como una recarga.
+    aceptar.className = tipo === 'normal'
+        ? 'btn-primario'
+        : 'btn bg-rose-600 text-white shadow-sm shadow-rose-200 hover:bg-rose-700 focus-visible:ring-rose-400';
+    const icono = dialogo.querySelector('[data-confirmacion-icono]');
+    icono?.classList.toggle('bg-rose-100', tipo !== 'normal');
+    icono?.classList.toggle('text-rose-600', tipo !== 'normal');
+    icono?.classList.toggle('bg-celeste-100', tipo === 'normal');
+    icono?.classList.toggle('text-celeste-600', tipo === 'normal');
     dialogo.returnValue = '';
     dialogo.showModal();
 
@@ -73,6 +83,7 @@ document.addEventListener('submit', async (evento) => {
         titulo: formulario.dataset.confirmarTitulo,
         mensaje,
         boton: formulario.dataset.confirmarBoton,
+        tipo: formulario.dataset.confirmarTipo,
     });
 
     if (aceptado) {

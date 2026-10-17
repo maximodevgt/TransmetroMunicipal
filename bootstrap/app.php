@@ -22,6 +22,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectUsersTo('/');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // Datos de la tarjeta bancaria simulada: nunca se guardan en la sesión al volver al formulario con errores.
+        $exceptions->dontFlash(['numero', 'cvv', 'vencimiento']);
         $exceptions->render(fn (ReglaNegocioException $e, Request $request) => $request->expectsJson()
             ? response()->json(['message' => $e->getMessage()], 422)
             : back()->withInput()->with('error', $e->getMessage()));

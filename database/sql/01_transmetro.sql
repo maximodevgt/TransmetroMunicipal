@@ -328,20 +328,31 @@ CREATE TABLE transacciones (
   id               BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   tarjeta_id       BIGINT UNSIGNED NOT NULL,
   acceso_id        BIGINT UNSIGNED NULL,
+  estacion_id      BIGINT UNSIGNED NULL,
   user_id          BIGINT UNSIGNED NULL,
   tipo             ENUM('recarga','pago') NOT NULL,
+  metodo           ENUM('efectivo','tarjeta') NULL,
   monto            DECIMAL(10,2) NOT NULL,
   saldo_resultante DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   estado           ENUM('aprobada','rechazada') NOT NULL DEFAULT 'aprobada',
   motivo_rechazo   VARCHAR(150) NULL,
+  -- Pasarela SIMULADA: solo marca, últimos 4 dígitos y referencia inventada; nunca el número completo ni el CVV.
+  tarjeta_marca      VARCHAR(20) NULL,
+  tarjeta_ultimos4   CHAR(4) NULL,
+  referencia         VARCHAR(40) NULL,
+  llave_idempotencia VARCHAR(64) NULL,
   created_at       TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at       TIMESTAMP NULL,
   KEY idx_transacciones_tarjeta_fecha (tarjeta_id, created_at),
+  CONSTRAINT uk_transacciones_llave UNIQUE (llave_idempotencia),
   CONSTRAINT chk_transacciones_monto CHECK (monto > 0),
+  CONSTRAINT chk_transacciones_ultimos4 CHECK (tarjeta_ultimos4 IS NULL OR tarjeta_ultimos4 REGEXP '^[0-9]{4}$'),
   CONSTRAINT fk_transacciones_tarjeta FOREIGN KEY (tarjeta_id)
     REFERENCES tarjetas(id) ON UPDATE CASCADE ON DELETE RESTRICT,
   CONSTRAINT fk_transacciones_acceso FOREIGN KEY (acceso_id)
     REFERENCES accesos(id) ON UPDATE CASCADE ON DELETE SET NULL,
+  CONSTRAINT fk_transacciones_estacion FOREIGN KEY (estacion_id)
+    REFERENCES estaciones(id) ON UPDATE CASCADE ON DELETE SET NULL,
   CONSTRAINT fk_transacciones_user FOREIGN KEY (user_id)
     REFERENCES users(id) ON UPDATE CASCADE ON DELETE SET NULL
 ) ENGINE=InnoDB;

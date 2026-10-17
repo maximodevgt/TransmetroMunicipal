@@ -8,6 +8,7 @@ use App\Models\Bus;
 use App\Models\Estacion;
 use App\Models\Linea;
 use App\Models\Piloto;
+use App\Models\Transaccion;
 use App\Services\ResolucionAlertaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -42,6 +43,27 @@ class DashboardController extends Controller
             'estacion' => $usuario->estacion?->load('lineas', 'accesos.guardias'),
             'bitacora' => $bitacora,
             'enlacesBitacora' => Bitacora::enlaces($bitacora),
+            'caja' => $this->cajaDeHoy($usuario),
         ]);
+    }
+
+    /**
+     * Recaudación y rechazos de hoy (el operador ve los de su estación). Una sola consulta.
+     */
+    private function cajaDeHoy($usuario): array
+    {
+        $fila = Transaccion::visiblesPara($usuario)->where('created_at', '>=', today())->selectRaw(
+            "COALESCE(SUM(CASE WHEN tipo = 'recarga' AND estado = 'aprobada' THEN monto END), 0) AS recargas,
+             COALESCE(SUM(CASE WHEN tipo = 'pago' AND estado = 'aprobada' THEN monto END), 0) AS pasajes,
+             SUM(tipo = 'pago' AND estado = 'aprobada') AS cantidad_pasajes,
+             SUM(estado = 'rechazada') AS rechazados"
+        )->first();
+
+        return [
+            'recargas' => (float) $fila->recargas,
+            'pasajes' => (float) $fila->pasajes,
+            'cantidad_pasajes' => (int) $fila->cantidad_pasajes,
+            'rechazados' => (int) $fila->rechazados,
+        ];
     }
 }

@@ -9,6 +9,9 @@
         ['ruta' => 'seguimiento.index', 'activo' => 'seguimiento.*', 'texto' => 'Seguimiento en vivo', 'icono' => 'en_vivo', 'rol' => null],
         ['ruta' => 'recorridos.index', 'activo' => 'recorridos.*', 'texto' => 'Recorridos', 'icono' => 'recorridos', 'rol' => null],
         ['ruta' => 'alertas.index', 'activo' => 'alertas.*', 'texto' => 'Alertas', 'icono' => 'alerta', 'rol' => null],
+        ['ruta' => 'tarjetas.index', 'activo' => ['tarjetas.*', 'recargas.*'], 'texto' => 'Tarjetas', 'icono' => 'tarjeta', 'rol' => null],
+        ['ruta' => 'torniquete.index', 'activo' => 'torniquete.*', 'texto' => 'Torniquete', 'icono' => 'torniquete', 'rol' => null],
+        ['ruta' => 'transacciones.index', 'activo' => 'transacciones.*', 'texto' => 'Movimientos', 'icono' => 'movimientos', 'rol' => null],
         ['ruta' => 'lineas.index', 'activo' => 'lineas.*', 'texto' => 'Líneas', 'icono' => 'lineas', 'rol' => null],
         ['ruta' => 'estaciones.index', 'activo' => 'estaciones.*', 'texto' => 'Estaciones', 'icono' => 'estaciones', 'rol' => null],
         ['ruta' => 'buses.index', 'activo' => 'buses.*', 'texto' => 'Buses', 'icono' => 'buses', 'rol' => null],
@@ -30,7 +33,7 @@
 </head>
 <body class="min-h-screen bg-celeste-50 font-sans text-slate-800 antialiased">
     {{-- Barra superior en móvil --}}
-    <header class="sticky top-0 z-30 flex items-center justify-between bg-gradient-to-r from-celeste-400 to-celeste-500 px-4 py-3 text-white shadow lg:hidden">
+    <header class="sticky top-0 z-30 flex print:!hidden items-center justify-between bg-gradient-to-r from-celeste-400 to-celeste-500 px-4 py-3 text-white shadow lg:hidden">
         <span class="font-semibold">Transmetro Municipal</span>
         <div class="flex items-center gap-1">
             <x-campana id="movil" clara />
@@ -41,7 +44,7 @@
     </header>
 
     {{-- Menú lateral --}}
-    <aside data-menu class="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col bg-gradient-to-b from-celeste-400 via-celeste-500 to-celeste-600 text-white shadow-xl lg:flex">
+    <aside data-menu class="fixed inset-y-0 left-0 z-40 hidden w-64 print:!hidden flex-col bg-gradient-to-b from-celeste-400 via-celeste-500 to-celeste-600 text-white shadow-xl lg:flex">
         <div class="flex items-center gap-3 px-6 py-6">
             <div class="flex size-11 items-center justify-center rounded-2xl bg-white text-celeste-500 shadow">
                 <x-icono nombre="buses" class="size-6" />
@@ -58,8 +61,8 @@
                 <a href="{{ route($item['ruta']) }}"
                    @class([
                        'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition',
-                       'bg-white text-celeste-600 shadow' => request()->routeIs($item['activo']),
-                       'text-white/90 hover:bg-white/15' => ! request()->routeIs($item['activo']),
+                       'bg-white text-celeste-600 shadow' => request()->routeIs(...(array) $item['activo']),
+                       'text-white/90 hover:bg-white/15' => ! request()->routeIs(...(array) $item['activo']),
                    ])>
                     <x-icono :nombre="$item['icono']" />
                     {{ $item['texto'] }}
@@ -82,9 +85,9 @@
     </aside>
     <div data-menu-fondo class="fixed inset-0 z-30 hidden bg-celeste-900/30 lg:hidden"></div>
 
-    <main class="lg:pl-64">
+    <main class="lg:pl-64 print:!pl-0">
         {{-- Barra superior en escritorio --}}
-        <div class="sticky top-0 z-20 hidden items-center justify-end gap-3 border-b border-celeste-100 bg-white px-8 py-2 shadow-sm shadow-celeste-900/5 lg:flex">
+        <div class="sticky top-0 z-20 hidden items-center print:!hidden justify-end gap-3 border-b border-celeste-100 bg-white px-8 py-2 shadow-sm shadow-celeste-900/5 lg:flex">
             <x-campana id="escritorio" />
             <span class="text-sm text-slate-600">{{ $usuario->name }}</span>
         </div>
