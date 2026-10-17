@@ -5,7 +5,7 @@
         <a href="{{ route('lineas.index') }}" class="btn-secundario"><x-icono nombre="atras" class="size-4" /> Líneas</a>
         @if ($esAdmin)
             <a href="{{ route('lineas.edit', $linea) }}" class="btn-secundario"><x-icono nombre="editar" class="size-4" /> Editar</a>
-            <x-eliminar :accion="route('lineas.destroy', $linea)" confirmar="¿Eliminar la línea {{ $linea->codigo }}? Sus buses quedarán sin línea." />
+            <x-eliminar :accion="route('lineas.destroy', $linea)" titulo="¿Eliminar la línea {{ $linea->codigo }}?" confirmar="Sus buses quedarán sin línea. Esta acción no se puede deshacer." />
         @endif
     </x-slot:acciones>
 
@@ -66,7 +66,7 @@
                                                 <button class="rounded-lg px-2 py-1 text-xs font-semibold text-celeste-600 hover:bg-celeste-50">Guardar</button>
                                             </form>
                                         @endunless
-                                        <form method="POST" action="{{ route('lineas.estaciones.destroy', [$linea, $estacion]) }}" data-confirmar="¿Quitar {{ $estacion->nombre }} de la línea?">
+                                        <form method="POST" action="{{ route('lineas.estaciones.destroy', [$linea, $estacion]) }}" data-confirmar-titulo="¿Quitar {{ $estacion->nombre }} de la línea?" data-confirmar="Dejará de formar parte del recorrido de la línea {{ $linea->codigo }}." data-confirmar-boton="Sí, quitar">
                                             @csrf @method('DELETE')
                                             <button class="rounded-lg p-1.5 text-rose-500 hover:bg-rose-50" title="Quitar de la línea"><x-icono nombre="eliminar" class="size-4" /></button>
                                         </form>

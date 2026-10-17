@@ -2,7 +2,7 @@
     <x-slot:acciones>
         <a href="{{ route('pilotos.index') }}" class="btn-secundario"><x-icono nombre="atras" class="size-4" /> Pilotos</a>
         <a href="{{ route('pilotos.edit', $piloto) }}" class="btn-secundario"><x-icono nombre="editar" class="size-4" /> Editar</a>
-        <x-eliminar :accion="route('pilotos.destroy', $piloto)" confirmar="¿Eliminar al piloto {{ $piloto->nombre }}?" />
+        <x-eliminar :accion="route('pilotos.destroy', $piloto)" titulo="¿Eliminar al piloto {{ $piloto->nombre }}?" />
     </x-slot:acciones>
 
     <div class="grid gap-6 lg:grid-cols-3">
@@ -28,7 +28,7 @@
                             <td>{{ $estudio->titulo ?? '—' }}</td>
                             <td>{{ $estudio->anio ?? '—' }}</td>
                             <td class="text-right">
-                                <form method="POST" action="{{ route('pilotos.historial.destroy', [$piloto, $estudio]) }}" data-confirmar="¿Quitar este estudio del historial?">
+                                <form method="POST" action="{{ route('pilotos.historial.destroy', [$piloto, $estudio]) }}" data-confirmar-titulo="¿Quitar este estudio?" data-confirmar="Se retirará del historial educativo de {{ $piloto->nombre }}." data-confirmar-boton="Sí, quitar">
                                     @csrf @method('DELETE')
                                     <button class="rounded-lg p-1.5 text-rose-500 hover:bg-rose-50" title="Quitar"><x-icono nombre="eliminar" class="size-4" /></button>
                                 </form>

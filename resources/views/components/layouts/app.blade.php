@@ -21,15 +21,18 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-celeste-50 font-sans text-slate-800 antialiased">
-    {{-- Barra superior en movil --}}
+    {{-- Barra superior en móvil --}}
     <header class="sticky top-0 z-30 flex items-center justify-between bg-gradient-to-r from-celeste-400 to-celeste-500 px-4 py-3 text-white shadow lg:hidden">
         <span class="font-semibold">Transmetro Municipal</span>
-        <button type="button" data-menu-toggle class="rounded-lg p-1.5 hover:bg-white/20" aria-label="Abrir menú">
-            <x-icono nombre="menu" class="size-6" />
-        </button>
+        <div class="flex items-center gap-1">
+            <x-campana id="movil" clara />
+            <button type="button" data-menu-toggle class="rounded-lg p-1.5 hover:bg-white/20" aria-label="Abrir menú">
+                <x-icono nombre="menu" class="size-6" />
+            </button>
+        </div>
     </header>
 
-    {{-- Menu lateral --}}
+    {{-- Menú lateral --}}
     <aside data-menu class="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col bg-gradient-to-b from-celeste-400 via-celeste-500 to-celeste-600 text-white shadow-xl lg:flex">
         <div class="flex items-center gap-3 px-6 py-6">
             <div class="flex size-11 items-center justify-center rounded-2xl bg-white text-celeste-500 shadow">
@@ -72,6 +75,12 @@
     <div data-menu-fondo class="fixed inset-0 z-30 hidden bg-celeste-900/30 lg:hidden"></div>
 
     <main class="lg:pl-64">
+        {{-- Barra superior en escritorio --}}
+        <div class="sticky top-0 z-20 hidden items-center justify-end gap-3 border-b border-celeste-100 bg-white/80 px-8 py-2 backdrop-blur lg:flex">
+            <x-campana id="escritorio" />
+            <span class="text-sm text-slate-600">{{ $usuario->name }}</span>
+        </div>
+
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
             <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
                 <div>
@@ -85,19 +94,11 @@
                 @endisset
             </div>
 
-            @if (session('ok'))
-                <div class="mb-5 rounded-xl border border-celeste-200 bg-white px-4 py-3 text-sm text-celeste-800 shadow-sm">
-                    ✔ {{ session('ok') }}
-                </div>
-            @endif
-            @if (session('error'))
-                <div class="mb-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-                    {{ session('error') }}
-                </div>
-            @endif
-
             {{ $slot }}
         </div>
     </main>
+
+    <x-notificaciones />
+    <x-confirmacion />
 </body>
 </html>

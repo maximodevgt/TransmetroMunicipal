@@ -73,3 +73,81 @@
         @apply hover:bg-celeste-50/50;
     }
 }
+
+/* Notificaciones flotantes: entran desde la derecha (desde arriba en teléfono) y se encogen al salir. */
+.toast {
+    transition:
+        transform 0.3s ease,
+        opacity 0.3s ease;
+}
+
+.toast[data-estado='entrando'],
+.toast[data-estado='saliendo'] {
+    opacity: 0;
+    transform: translateX(calc(100% + 1rem));
+}
+
+@media (width < 40rem) {
+    .toast[data-estado='entrando'],
+    .toast[data-estado='saliendo'] {
+        transform: translateY(-120%);
+    }
+}
+
+.toast-progreso {
+    transform-origin: left;
+    animation: toast-progreso var(--duracion-toast, 5s) linear forwards;
+}
+
+.toast[data-pausado] .toast-progreso {
+    animation-play-state: paused;
+}
+
+@keyframes toast-progreso {
+    to {
+        transform: scaleX(0);
+    }
+}
+
+/* Ventana de confirmación */
+.confirmacion[open] {
+    animation: confirmacion-entrar 0.2s ease-out;
+}
+
+.confirmacion[open]::backdrop {
+    animation: confirmacion-fondo 0.2s ease-out;
+}
+
+@keyframes confirmacion-entrar {
+    from {
+        opacity: 0;
+        transform: translateY(0.5rem) scale(0.97);
+    }
+}
+
+@keyframes confirmacion-fondo {
+    from {
+        opacity: 0;
+    }
+}
+
+/* Movimiento reducido: sin desplazamientos; la barra de progreso se oculta (el cierre automático sigue igual). */
+@media (prefers-reduced-motion: reduce) {
+    .toast {
+        transition: opacity 0.15s linear;
+    }
+
+    .toast[data-estado='entrando'],
+    .toast[data-estado='saliendo'] {
+        transform: none;
+    }
+
+    .toast-progreso {
+        display: none;
+    }
+
+    .confirmacion[open],
+    .confirmacion[open]::backdrop {
+        animation: none;
+    }
+}

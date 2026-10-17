@@ -1,4 +1,8 @@
-// Menu lateral en pantallas pequenas.
+import './notificaciones';
+import './confirmacion';
+import './alertas';
+
+// Menú lateral en pantallas pequeñas.
 const menu = document.querySelector('[data-menu]');
 const fondo = document.querySelector('[data-menu-fondo]');
 
@@ -10,11 +14,3 @@ function alternarMenu(abrir) {
 
 document.querySelector('[data-menu-toggle]')?.addEventListener('click', () => alternarMenu(menu.classList.contains('hidden')));
 fondo?.addEventListener('click', () => alternarMenu(false));
-
-// Confirmacion antes de eliminar.
-document.addEventListener('submit', (evento) => {
-    const mensaje = evento.target.dataset.confirmar;
-    if (mensaje && !window.confirm(mensaje)) {
-        evento.preventDefault();
-    }
-});

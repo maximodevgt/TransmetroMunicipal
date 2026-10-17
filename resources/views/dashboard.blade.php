@@ -101,8 +101,8 @@
             </h2>
             <ul class="mt-4 space-y-3">
                 @forelse ($alertas as $alerta)
-                    <li class="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm">
-                        <p class="font-medium text-amber-800">{{ ucfirst(str_replace('_', ' ', $alerta->tipo)) }}</p>
+                    <li id="alerta-{{ $alerta->id }}" class="scroll-mt-24 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm target:ring-2 target:ring-amber-400">
+                        <p class="font-medium text-amber-800">{{ $alerta->tipoTexto() }}</p>
                         <p class="text-amber-700">{{ $alerta->mensaje }}</p>
                         <p class="mt-1 text-xs text-amber-600">{{ $alerta->created_at?->format('d/m/Y H:i') }}</p>
                     </li>

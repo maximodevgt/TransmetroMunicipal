@@ -19,8 +19,7 @@ class DashboardController extends Controller
         $usuario = $request->user();
 
         $alertas = Alerta::with(['estacion', 'linea', 'bus'])
-            ->where('estado', 'activa')
-            ->when(! $usuario->esAdministrador(), fn ($q) => $q->where('estacion_id', $usuario->estacion_id))
+            ->activasPara($usuario)
             ->latest()
             ->get();
 
