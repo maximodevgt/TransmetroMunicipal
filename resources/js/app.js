@@ -15,6 +15,22 @@ function alternarMenu(abrir) {
 document.querySelector('[data-menu-toggle]')?.addEventListener('click', () => alternarMenu(menu.classList.contains('hidden')));
 fondo?.addEventListener('click', () => alternarMenu(false));
 
+// Cuenta regresiva: <x data-cuenta-regresiva="ISO-8601"> muestra mm:ss hasta esa hora.
+document.querySelectorAll('[data-cuenta-regresiva]').forEach((elemento) => {
+    const fin = new Date(elemento.dataset.cuentaRegresiva).getTime();
+    const actualizar = () => {
+        const restante = Math.max(0, Math.round((fin - Date.now()) / 1000));
+        elemento.textContent = restante === 0
+            ? 'cumplida'
+            : `${Math.floor(restante / 60)}:${String(restante % 60).padStart(2, '0')}`;
+        if (restante === 0) {
+            clearInterval(intervalo);
+        }
+    };
+    const intervalo = setInterval(actualizar, 1000);
+    actualizar();
+});
+
 // Select dependiente: <select data-filtra="bus_id"> deja ver en #campo_bus_id solo el <optgroup data-grupo> elegido.
 document.querySelectorAll('select[data-filtra]').forEach((padre) => {
     const hijo = document.getElementById(`campo_${padre.dataset.filtra}`);

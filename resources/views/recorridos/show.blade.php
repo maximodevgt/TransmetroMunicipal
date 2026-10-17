@@ -18,6 +18,12 @@
         @endif
     </x-slot:acciones>
 
+    @if ($alerta)
+        <x-resolviendo :alerta="$alerta">
+            Confirme la espera de {{ \App\Services\AlertaService::ESPERA_EXTRA_MIN }} minutos de {{ $recorrido->bus->codigo }} en {{ $alerta->estacion->nombre }}, más abajo en la línea de tiempo.
+        </x-resolviendo>
+    @endif
+
     <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
         <div class="tarjeta p-4"><p class="text-xs text-slate-500">Estado</p><x-estado :valor="$recorrido->estado" class="mt-1" /></div>
         <div class="tarjeta p-4">
@@ -60,7 +66,8 @@
                         default => ['bg-emerald-100 text-emerald-700', 'Normal'],
                     };
                 @endphp
-                <li class="relative flex gap-4 pb-6 last:pb-0">
+                @php($esDeLaAlerta = $alerta && $visita && $alerta->estacion_id === $estacion->id)
+                <li id="visita-{{ $estacion->id }}" @class(['relative flex scroll-mt-24 gap-4 pb-6 last:pb-0', 'rounded-2xl bg-amber-50 p-3 ring-2 ring-amber-300' => $esDeLaAlerta])>
                     @unless ($loop->last)
                         <span @class(['absolute top-8 left-4 h-full w-0.5 -translate-x-1/2', 'bg-celeste-400' => $visita, 'bg-celeste-100' => ! $visita])></span>
                     @endunless
@@ -93,6 +100,19 @@
                                     <span class="insignia bg-amber-50 text-amber-700 ring-1 ring-amber-200">+{{ $visita->espera_extra_min }} min de espera</span>
                                 @endif
                             </div>
+                            @if ($esDeLaAlerta)
+                                {{-- Cuenta regresiva hasta que se cumplen los 5 minutos de espera desde la llegada --}}
+                                <form method="POST" action="{{ route('recorridos.confirmar-espera', $recorrido) }}" class="mt-3 flex flex-wrap items-center gap-3">
+                                    @csrf
+                                    <input type="hidden" name="alerta" value="{{ $alerta->id }}">
+                                    <button class="btn-primario">Confirmar espera de {{ \App\Services\AlertaService::ESPERA_EXTRA_MIN }} min</button>
+                                    <span class="text-sm text-amber-800" aria-live="polite">
+                                        Espera restante:
+                                        <strong data-cuenta-regresiva="{{ $visita->hora_llegada->copy()->addMinutes(\App\Services\AlertaService::ESPERA_EXTRA_MIN)->toIso8601String() }}"
+                                                class="tabular-nums">{{ \App\Services\AlertaService::ESPERA_EXTRA_MIN }}:00</strong>
+                                    </span>
+                                </form>
+                            @endif
                         @elseif ($esSiguiente && $puedeRegistrar)
                             <form method="POST" action="{{ route('recorridos.llegadas.store', $recorrido) }}" class="mt-2 flex flex-wrap items-end gap-2 rounded-xl bg-celeste-50 p-3">
                                 @csrf

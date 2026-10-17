@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ReglaNegocioException;
 use App\Models\Alerta;
+use App\Models\Bitacora;
 use App\Models\Estacion;
 use App\Models\Linea;
+use App\Models\User;
 use App\Services\AlertaService;
+use App\Services\ResolucionAlertaService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -38,23 +42,45 @@ class AlertaController extends Controller
         ]);
     }
 
-    public function show(Request $request, Alerta $alerta): View
+    public function show(Request $request, Alerta $alerta, ResolucionAlertaService $resolucion): View
     {
         abort_unless($alerta->puedeVerla($request->user()), 403, 'Solo puede ver las alertas de su estación.');
 
-        return view('alertas.show', ['alerta' => $alerta->load(['estacion', 'bus', 'linea'])]);
+        return view('alertas.show', [
+            'alerta' => $alerta->load(['estacion', 'bus', 'linea']),
+            'accion' => $resolucion->accion($alerta, $request->user()),
+            'resolviendo' => $request->boolean('resolver'),
+            // Quién la atendió, cuándo y qué se hizo queda en la bitácora.
+            'historial' => Bitacora::with('user')->where('tabla', 'alertas')->where('registro_id', $alerta->id)->orderBy('id')->get(),
+        ]);
     }
 
     public function atender(Request $request, Alerta $alerta, AlertaService $servicio): RedirectResponse
     {
         abort_unless($alerta->puedeVerla($request->user()), 403, 'Solo puede atender las alertas de su estación.');
+        $datos = $request->validate(['nota' => ['nullable', 'string', 'max:200']], [], ['nota' => 'qué se hizo']);
 
         if (! $alerta->activa()) {
             return back()->with('info', 'La alerta ya estaba atendida.');
         }
-        $servicio->atender($alerta);
+        $servicio->atender($alerta, $datos['nota'] ?? null);
 
         return back()->with('ok', 'Alerta atendida.');
+    }
+
+    /**
+     * El operador no inicia recorridos: ante una alta demanda de su estación pide una unidad al administrador.
+     */
+    public function solicitarUnidad(Request $request, Alerta $alerta, AlertaService $servicio): RedirectResponse
+    {
+        abort_unless($alerta->puedeVerla($request->user()), 403, 'Solo puede resolver las alertas de su estación.');
+        if (! $alerta->activa() || $alerta->tipo !== 'alta_demanda') {
+            throw new ReglaNegocioException('Solo se solicita unidad para una alerta de alta demanda activa.');
+        }
+
+        $servicio->solicitarUnidad($alerta, $request->user());
+
+        return redirect()->route('alertas.show', $alerta)->with('ok', 'Solicitud enviada: el administrador recibirá el aviso para enviar otro bus.');
     }
 
     /**
@@ -83,14 +109,15 @@ class AlertaController extends Controller
         return response()->json([
             'activas' => Alerta::activasPara($usuario)->count(),
             'ultimo_id' => max($desde ?? 0, (int) Alerta::activasPara($usuario)->max('id')),
-            'nuevas' => $nuevas->map($this->resumen(...))->values(),
-            'recientes' => $recientes->map($this->resumen(...))->values(),
+            'nuevas' => $nuevas->map(fn ($a) => $this->resumen($a, $usuario))->values(),
+            'recientes' => $recientes->map(fn ($a) => $this->resumen($a, $usuario))->values(),
         ]);
     }
 
-    private function resumen(Alerta $alerta): array
+    private function resumen(Alerta $alerta, User $usuario): array
     {
         return [
+            'resolver' => app(ResolucionAlertaService::class)->accion($alerta, $usuario),
             'id' => $alerta->id,
             'tipo' => $alerta->tipo,
             'tipo_texto' => $alerta->tipoTexto(),

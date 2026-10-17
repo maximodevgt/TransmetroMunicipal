@@ -60,7 +60,7 @@ function programarCierre(toast) {
 
 /**
  * Muestra una notificación flotante.
- * tipo: 'exito' | 'error' | 'advertencia' | 'info'. opciones.enlace: { url, texto } agrega un botón.
+ * tipo: 'exito' | 'error' | 'advertencia' | 'info'. opciones.enlaces: [{ url, texto }] agrega botones.
  */
 export function notificar(tipo, titulo, mensaje, opciones = {}) {
     const plantilla = document.querySelector(`template[data-plantilla-toast="${tipo}"]`)
@@ -76,12 +76,19 @@ export function notificar(tipo, titulo, mensaje, opciones = {}) {
     parrafo.textContent = mensaje ?? '';
     parrafo.hidden = !mensaje;
 
-    if (opciones.enlace?.url) {
-        const enlace = toast.querySelector('[data-toast-enlace]');
-        enlace.href = opciones.enlace.url;
-        enlace.textContent = opciones.enlace.texto ?? 'Ver';
+    // Botones de la notificación: opciones.enlaces [{ url, texto }] (o un solo opciones.enlace).
+    const enlaces = (opciones.enlaces ?? [opciones.enlace]).filter((enlace) => enlace?.url);
+    const plantillaEnlace = toast.querySelector('[data-toast-enlace]');
+    enlaces.forEach((datos, i) => {
+        const enlace = i === 0 ? plantillaEnlace : plantillaEnlace.cloneNode(true);
+        enlace.href = datos.url;
+        enlace.textContent = datos.texto ?? 'Ver';
         enlace.hidden = false;
-    }
+        if (i > 0) {
+            enlace.classList.add('ml-2');
+            plantillaEnlace.parentElement.append(enlace);
+        }
+    });
 
     toast.style.setProperty('--duracion-toast', `${DURACION_MS}ms`);
     toast.querySelector('[data-toast-cerrar]').addEventListener('click', () => cerrar(toast));

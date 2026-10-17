@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ReglaNegocioException;
 use App\Models\Bitacora;
 use App\Models\Bus;
 use App\Models\Linea;
 use App\Models\Parqueo;
 use App\Services\AsignacionService;
+use App\Services\ResolucionAlertaService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,11 +24,17 @@ class BusController extends Controller implements HasMiddleware
         return [new Middleware('rol:administrador', except: ['index', 'show'])];
     }
 
-    public function index(Request $request): View
+    public function index(Request $request, ResolucionAlertaService $resolucion): View
     {
         $filtros = $request->only('linea_id', 'estado');
 
+        // Con ?alerta=ID (insuficiencia de unidades) se muestra cuántos buses le faltan a la línea y se ofrece asignarlos.
+        $alerta = $resolucion->enCurso($request, 'insuficiencia_unidades');
+        $faltan = $alerta ? max(0, $alerta->linea->estaciones()->count() - $alerta->linea->buses()->count()) : 0;
+
         return view('buses.index', [
+            'alerta' => $alerta,
+            'faltan' => $faltan,
             'filtros' => $filtros,
             'lineas' => Linea::orderBy('id')->get(),
             'buses' => Bus::with(['linea', 'parqueo'])
@@ -113,6 +121,42 @@ class BusController extends Controller implements HasMiddleware
         Bitacora::registrar('eliminar', $bus, "Eliminación del bus {$bus->codigo}");
 
         return $this->conAviso(redirect()->route('buses.index')->with('ok', 'Bus eliminado.'), $asignacion->revisarMinimo($linea));
+    }
+
+    /**
+     * Asignar un bus sin línea a la línea de una alerta de insuficiencia. Si la línea llega a su mínimo,
+     * la alerta queda atendida y se vuelve a su detalle; si no, se sigue en la lista con lo que falta.
+     */
+    public function asignarLinea(Request $request, Bus $bus, ResolucionAlertaService $resolucion, AsignacionService $asignacion): RedirectResponse
+    {
+        $alerta = $resolucion->exigir($request, 'insuficiencia_unidades')
+            ?? throw new ReglaNegocioException('Indique la alerta de insuficiencia de unidades que se resuelve.');
+        if ($bus->linea_id !== null) {
+            throw new ReglaNegocioException("El bus {$bus->codigo} ya está asignado a una línea; elija uno sin línea.");
+        }
+        $linea = $alerta->linea;
+
+        try {
+            $bus->update(['linea_id' => $linea->id]);
+        } catch (QueryException $e) {
+            return $this->volverConErrorBd($e);
+        }
+        Bitacora::registrar('asignar_linea', $bus, "{$bus->codigo} asignado a la línea {$linea->codigo}");
+
+        $faltan = $linea->estaciones()->count() - $linea->buses()->count();
+        if ($faltan <= 0) {
+            $hecho = "se asignó {$bus->codigo} a la línea {$linea->codigo}, que recuperó su mínimo de buses";
+            $resolucion->resolver($alerta, $hecho);
+            $asignacion->revisarMinimoRecuperado($linea);
+
+            return redirect()->route('alertas.show', $alerta)->with('ok', "Alerta #{$alerta->id} resuelta: {$hecho}.");
+        }
+
+        // Todavía falta: se actualiza el mensaje de la alerta y se sigue resolviendo.
+        $asignacion->revisarMinimo($linea);
+
+        return redirect()->route('buses.index', ['linea_id' => 'sin', 'alerta' => $alerta->id])
+            ->with('ok', "{$bus->codigo} asignado a la línea {$linea->codigo}. ".($faltan === 1 ? 'Falta 1 bus.' : "Faltan {$faltan} buses."));
     }
 
     private function conAviso(RedirectResponse $respuesta, ?string $aviso): RedirectResponse

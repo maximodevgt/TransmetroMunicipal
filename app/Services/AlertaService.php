@@ -134,17 +134,46 @@ class AlertaService
 
         $alertas = Alerta::where('linea_id', $linea->id)->where('tipo', 'insuficiencia_unidades')->where('estado', 'activa')->get();
         foreach ($alertas as $alerta) {
-            $alerta->update(['estado' => 'atendida', 'atendida_en' => now()]);
-            Bitacora::registrar('atender', $alerta, "Alerta de insuficiencia de la línea {$linea->codigo} atendida automáticamente: recuperó el mínimo de buses");
+            $this->atender($alerta, "atendida automáticamente: la línea {$linea->codigo} recuperó el mínimo de buses");
         }
 
         return $alertas->count();
     }
 
-    public function atender(Alerta $alerta): void
+    /**
+     * Marca la alerta como atendida. Quién (usuario) y cuándo quedan en la bitácora junto con qué se hizo;
+     * la tabla alertas solo guarda el estado y atendida_en.
+     */
+    public function atender(Alerta $alerta, ?string $queSeHizo = null): void
     {
         $alerta->update(['estado' => 'atendida', 'atendida_en' => now()]);
-        Bitacora::registrar('atender', $alerta, 'Alerta de '.mb_strtolower($alerta->tipoTexto()).' atendida: '.$alerta->mensaje);
+
+        $detalle = match (true) {
+            $queSeHizo === null || trim($queSeHizo) === '' => "Alerta #{$alerta->id} atendida sin comentario",
+            str_starts_with($queSeHizo, 'atendida') => "Alerta #{$alerta->id} {$queSeHizo}",
+            default => "Alerta #{$alerta->id} atendida: ".trim($queSeHizo),
+        };
+        Bitacora::registrar('atender', $alerta, $detalle);
+    }
+
+    /**
+     * El operador pide una unidad para una alerta de alta demanda de su estación: se genera una alerta
+     * 'asignacion' que el administrador recibe en vivo (campana y toast). No se duplica si ya hay una activa.
+     */
+    public function solicitarUnidad(Alerta $alerta, User $operador): Alerta
+    {
+        $estacion = $alerta->estacion;
+        $solicitud = $this->crearSinDuplicar(
+            ['estacion_id' => $estacion->id, 'tipo' => 'asignacion'],
+            [
+                'linea_id' => $alerta->linea_id,
+                'mensaje' => "{$operador->name} solicita una unidad para la estación {$estacion->nombre} (alerta #{$alerta->id} de alta demanda).",
+            ],
+            "Solicitud de unidad para la estación {$estacion->nombre}",
+        );
+        Bitacora::registrar('solicitar_unidad', $alerta, "Alerta #{$alerta->id}: {$operador->name} solicitó una unidad al administrador");
+
+        return $solicitud;
     }
 
     /**
