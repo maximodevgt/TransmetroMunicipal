@@ -28,12 +28,20 @@ class AsignacionBusesTest extends TestCase
     {
         $sobran = $linea->buses()->count() - $cantidad;
         if ($sobran > 0) {
-            Bus::where('linea_id', $linea->id)->orderByDesc('id')->limit($sobran)->update(['linea_id' => null]);
+            Bus::where('linea_id', $linea->id)->whereDoesntHave('recorridoEnCurso')->orderByDesc('id')->limit($sobran)->update(['linea_id' => null]);
         }
         for ($i = $sobran; $i < 0; $i++) {
             $this->nuevoBus($linea->id);
         }
         $this->assertSame($cantidad, $linea->buses()->count());
+    }
+
+    /**
+     * Un bus de la línea sin recorrido en curso (los buses en ruta no se pueden mover).
+     */
+    private function busLibre(Linea $linea): Bus
+    {
+        return $linea->buses()->whereDoesntHave('recorridoEnCurso')->firstOrFail();
     }
 
     private function datosBus(Bus $bus, array $cambios): array
@@ -52,7 +60,7 @@ class AsignacionBusesTest extends TestCase
         $estaciones = $l1->estaciones()->count();
         $this->dejarBuses($l1, $estaciones);
         Alerta::where('linea_id', $l1->id)->where('tipo', 'insuficiencia_unidades')->update(['estado' => 'atendida']);
-        $bus = $l1->buses()->firstOrFail();
+        $bus = $this->busLibre($l1);
 
         $this->actingAs($this->administrador())
             ->put(route('buses.update', $bus), $this->datosBus($bus, ['linea_id' => '']))
@@ -70,7 +78,7 @@ class AsignacionBusesTest extends TestCase
     {
         $l1 = Linea::where('codigo', 'L1')->firstOrFail();
         $this->dejarBuses($l1, $l1->estaciones()->count());
-        [$primero, $segundo] = $l1->buses()->take(2)->get()->all();
+        [$primero, $segundo] = $l1->buses()->whereDoesntHave('recorridoEnCurso')->take(2)->get()->all();
         $this->actingAs($this->administrador());
 
         $this->put(route('buses.update', $primero), $this->datosBus($primero, ['linea_id' => '']));
@@ -87,7 +95,7 @@ class AsignacionBusesTest extends TestCase
         $l12 = Linea::where('codigo', 'L12')->firstOrFail();
         $this->dejarBuses($l1, $l1->estaciones()->count());
         $this->dejarBuses($l12, $l12->estaciones()->count());
-        $bus = $l1->buses()->firstOrFail();
+        $bus = $this->busLibre($l1);
 
         $this->actingAs($this->administrador())
             ->put(route('buses.update', $bus), $this->datosBus($bus, ['linea_id' => $l12->id]))
@@ -102,7 +110,7 @@ class AsignacionBusesTest extends TestCase
         $l1 = Linea::where('codigo', 'L1')->firstOrFail();
         $this->dejarBuses($l1, $l1->estaciones()->count());
         $bus = $this->nuevoBus(null);
-        $l1->buses()->first()->update(['linea_id' => null]);
+        $this->busLibre($l1)->update(['linea_id' => null]);
         $bus->update(['linea_id' => $l1->id]);
 
         $this->actingAs($this->administrador())

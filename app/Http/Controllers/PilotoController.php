@@ -66,7 +66,7 @@ class PilotoController extends Controller
         } catch (QueryException $e) {
             return $this->volverConErrorBd($e);
         }
-        Bitacora::registrar('editar', $piloto, "Actualizacion del piloto {$piloto->nombre}");
+        Bitacora::registrar('editar', $piloto, "Actualización del piloto {$piloto->nombre}");
 
         return redirect()->route('pilotos.show', $piloto)->with('ok', 'Piloto actualizado.');
     }
@@ -78,7 +78,7 @@ class PilotoController extends Controller
         } catch (QueryException $e) {
             return back()->with('error', $this->mensajeErrorBd($e).' Puede marcarlo como inactivo.');
         }
-        Bitacora::registrar('eliminar', $piloto, "Eliminacion del piloto {$piloto->nombre}");
+        Bitacora::registrar('eliminar', $piloto, "Eliminación del piloto {$piloto->nombre}");
 
         return redirect()->route('pilotos.index')->with('ok', 'Piloto eliminado.');
     }

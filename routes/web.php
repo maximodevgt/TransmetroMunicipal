@@ -10,8 +10,10 @@ use App\Http\Controllers\GuardiaController;
 use App\Http\Controllers\HistorialEducativoController;
 use App\Http\Controllers\LineaController;
 use App\Http\Controllers\LineaEstacionController;
+use App\Http\Controllers\MiEstacionController;
 use App\Http\Controllers\ParqueoController;
 use App\Http\Controllers\PilotoController;
+use App\Http\Controllers\RecorridoController;
 use App\Http\Controllers\UsuarioController;
 use Illuminate\Support\Facades\Route;
 
@@ -30,6 +32,21 @@ Route::middleware(['auth', 'activo'])->group(function () {
     Route::resource('estaciones', EstacionController::class)->parameters(['estaciones' => 'estacion']);
     Route::resource('buses', BusController::class)->parameters(['buses' => 'bus']);
     Route::resource('parqueos', ParqueoController::class)->parameters(['parqueos' => 'parqueo']);
+
+    // Recorridos: iniciar y finalizar solo administrador; la llegada la registran ambos (el operador en su estación).
+    Route::resource('recorridos', RecorridoController::class)->only(['index', 'create', 'store', 'show']);
+    Route::post('recorridos/{recorrido}/llegadas', [RecorridoController::class, 'llegada'])->name('recorridos.llegadas.store');
+    Route::patch('recorridos/{recorrido}/finalizar', [RecorridoController::class, 'finalizar'])->name('recorridos.finalizar');
+
+    // Alertas: el operador solo ve y atiende las de su estación (lo revisa el controlador).
+    Route::get('alertas', [AlertaController::class, 'index'])->name('alertas.index');
+    Route::get('alertas/{alerta}', [AlertaController::class, 'show'])->whereNumber('alerta')->name('alertas.show');
+    Route::patch('alertas/{alerta}/atender', [AlertaController::class, 'atender'])->whereNumber('alerta')->name('alertas.atender');
+
+    Route::middleware('rol:operador')->group(function () {
+        Route::get('mi-estacion', [MiEstacionController::class, 'show'])->name('mi-estacion');
+        Route::post('mi-estacion/pasajeros', [MiEstacionController::class, 'registrarEspera'])->name('mi-estacion.pasajeros');
+    });
 
     Route::middleware('rol:administrador')->group(function () {
         Route::post('lineas/{linea}/estaciones', [LineaEstacionController::class, 'store'])->name('lineas.estaciones.store');

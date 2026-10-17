@@ -98,6 +98,9 @@ class LineaEstacionController extends Controller
         }
         Bitacora::registrar('quitar_estacion', $linea, "Estación {$estacion->nombre} retirada de {$linea->codigo}");
 
+        // Con una estación menos el mínimo baja: si la línea ya queda cubierta, su alerta de insuficiencia se atiende.
+        $asignacion->revisarMinimoRecuperado($linea);
+
         return back()->with('ok', "Estación {$estacion->nombre} retirada de la línea.");
     }
 }

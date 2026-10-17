@@ -2,14 +2,18 @@
 
 @php
     $usuario = auth()->user();
+    // 'rol' => null lo ven todos; 'administrador' u 'operador' solo ese rol.
     $menu = [
-        ['ruta' => 'dashboard', 'activo' => 'dashboard', 'texto' => 'Panel', 'icono' => 'inicio', 'admin' => false],
-        ['ruta' => 'lineas.index', 'activo' => 'lineas.*', 'texto' => 'Líneas', 'icono' => 'lineas', 'admin' => false],
-        ['ruta' => 'estaciones.index', 'activo' => 'estaciones.*', 'texto' => 'Estaciones', 'icono' => 'estaciones', 'admin' => false],
-        ['ruta' => 'buses.index', 'activo' => 'buses.*', 'texto' => 'Buses', 'icono' => 'buses', 'admin' => false],
-        ['ruta' => 'parqueos.index', 'activo' => 'parqueos.*', 'texto' => 'Parqueos', 'icono' => 'parqueos', 'admin' => false],
-        ['ruta' => 'pilotos.index', 'activo' => 'pilotos.*', 'texto' => 'Pilotos', 'icono' => 'pilotos', 'admin' => true],
-        ['ruta' => 'usuarios.index', 'activo' => 'usuarios.*', 'texto' => 'Usuarios', 'icono' => 'usuarios', 'admin' => true],
+        ['ruta' => 'dashboard', 'activo' => 'dashboard', 'texto' => 'Panel', 'icono' => 'inicio', 'rol' => null],
+        ['ruta' => 'mi-estacion', 'activo' => 'mi-estacion*', 'texto' => 'Mi estación', 'icono' => 'mi_estacion', 'rol' => 'operador'],
+        ['ruta' => 'recorridos.index', 'activo' => 'recorridos.*', 'texto' => 'Recorridos', 'icono' => 'recorridos', 'rol' => null],
+        ['ruta' => 'alertas.index', 'activo' => 'alertas.*', 'texto' => 'Alertas', 'icono' => 'alerta', 'rol' => null],
+        ['ruta' => 'lineas.index', 'activo' => 'lineas.*', 'texto' => 'Líneas', 'icono' => 'lineas', 'rol' => null],
+        ['ruta' => 'estaciones.index', 'activo' => 'estaciones.*', 'texto' => 'Estaciones', 'icono' => 'estaciones', 'rol' => null],
+        ['ruta' => 'buses.index', 'activo' => 'buses.*', 'texto' => 'Buses', 'icono' => 'buses', 'rol' => null],
+        ['ruta' => 'parqueos.index', 'activo' => 'parqueos.*', 'texto' => 'Parqueos', 'icono' => 'parqueos', 'rol' => null],
+        ['ruta' => 'pilotos.index', 'activo' => 'pilotos.*', 'texto' => 'Pilotos', 'icono' => 'pilotos', 'rol' => 'administrador'],
+        ['ruta' => 'usuarios.index', 'activo' => 'usuarios.*', 'texto' => 'Usuarios', 'icono' => 'usuarios', 'rol' => 'administrador'],
     ];
 @endphp
 
@@ -47,7 +51,7 @@
 
         <nav class="flex-1 space-y-1 px-3">
             @foreach ($menu as $item)
-                @continue($item['admin'] && ! $usuario->esAdministrador())
+                @continue($item['rol'] !== null && $item['rol'] !== $usuario->rol)
                 <a href="{{ route($item['ruta']) }}"
                    @class([
                        'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition',

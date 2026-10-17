@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Alerta;
-use App\Models\Bitacora;
+use App\Exceptions\ReglaNegocioException;
+use App\Models\Bus;
 use App\Models\Estacion;
 use App\Models\Linea;
 
@@ -13,6 +13,30 @@ use App\Models\Linea;
  */
 class AsignacionService
 {
+    public function __construct(private AlertaService $alertas) {}
+
+    /**
+     * Un bus en ruta no se quita ni se reasigna de su línea, ni se elimina, hasta finalizar su recorrido.
+     *
+     * @param  string  $accion  'quitar o reasignar' | 'eliminar'
+     */
+    public function validarBusSinRecorrido(Bus $bus, string $accion): void
+    {
+        if ($recorrido = $bus->recorridoEnCurso()->first()) {
+            $verbo = $accion === 'eliminar' ? 'eliminarlo' : 'quitarlo o reasignarlo de su línea';
+            throw new ReglaNegocioException("El bus {$bus->codigo} está en ruta (recorrido #{$recorrido->id} en curso). Finalice el recorrido antes de {$verbo}.");
+        }
+    }
+
+    /**
+     * Después de que un bus llega a una línea (o la línea pierde una estación): si recuperó el mínimo,
+     * su alerta de insuficiencia se atiende sola.
+     */
+    public function revisarMinimoRecuperado(?Linea $linea): int
+    {
+        return $this->alertas->atenderInsuficienciaSiCubierta($linea);
+    }
+
     /**
      * Revisar el mínimo después de que un bus deja una línea (reasignado, sin línea o eliminado).
      * La operación ya se guardó: si la línea quedó corta se crea una alerta 'insuficiencia_unidades'
@@ -34,13 +58,7 @@ class AsignacionService
         $mensaje = "La línea {$linea->codigo} quedó con {$buses} ".($buses === 1 ? 'bus' : 'buses')
             ." y necesita al menos {$estaciones} (uno por estación). Faltan {$faltan}.";
 
-        $alerta = Alerta::updateOrCreate(
-            ['linea_id' => $linea->id, 'tipo' => 'insuficiencia_unidades', 'estado' => 'activa'],
-            ['mensaje' => $mensaje],
-        );
-        if ($alerta->wasRecentlyCreated) {
-            Bitacora::registrar('crear', $alerta, "Alerta de insuficiencia de unidades en la línea {$linea->codigo}");
-        }
+        $this->alertas->registrarInsuficiencia($linea, $mensaje);
 
         return $mensaje;
     }

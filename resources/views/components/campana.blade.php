@@ -17,7 +17,7 @@
          class="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-2xl bg-white text-slate-800 shadow-xl ring-1 ring-celeste-100">
         <div class="flex items-center justify-between border-b border-celeste-50 px-4 py-3">
             <p class="text-sm font-semibold text-celeste-900">Alertas activas</p>
-            <a href="{{ route('dashboard') }}" class="text-xs font-medium text-celeste-600 hover:underline">Ver en el panel</a>
+            <a href="{{ route('alertas.index', ['estado' => 'activa']) }}" class="text-xs font-medium text-celeste-600 hover:underline">Ver todas</a>
         </div>
         <ul data-campana-lista class="max-h-80 divide-y divide-celeste-50 overflow-y-auto">
             <li class="px-4 py-6 text-center text-sm text-slate-500">Cargando…</li>

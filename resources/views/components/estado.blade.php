@@ -9,6 +9,10 @@
         'mantenimiento' => 'bg-amber-100 text-amber-700',
         'inactiva' => 'bg-slate-100 text-slate-500',
         'inactivo' => 'bg-slate-100 text-slate-500',
+        'en_curso' => 'bg-emerald-100 text-emerald-700',
+        'finalizado' => 'bg-slate-100 text-slate-600',
+        'cancelado' => 'bg-rose-100 text-rose-700',
+        'atendida' => 'bg-slate-100 text-slate-600',
     ];
 @endphp
 

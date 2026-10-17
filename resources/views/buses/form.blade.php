@@ -8,6 +8,13 @@
             @csrf
             @if ($bus->exists) @method('PUT') @endif
 
+            @if ($bus->recorridoEnCurso)
+                <p class="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-800 ring-1 ring-emerald-200">
+                    Este bus está en ruta (<a href="{{ route('recorridos.show', $bus->recorridoEnCurso) }}" class="font-semibold underline">recorrido #{{ $bus->recorridoEnCurso->id }}</a>):
+                    no se puede cambiar su línea ni su estado hasta finalizar el recorrido.
+                </p>
+            @endif
+
             <div class="grid gap-5 sm:grid-cols-2">
                 <x-campo nombre="codigo" etiqueta="Código" :valor="$bus->codigo" required maxlength="20" placeholder="BUS-136" />
                 <x-campo nombre="placa" etiqueta="Placa" :valor="$bus->placa" required maxlength="10" placeholder="TM-136" />
@@ -17,7 +24,7 @@
                          :opciones="$parqueos->pluck('nombre', 'id')" />
                 <x-campo nombre="capacidad_maxima" etiqueta="Capacidad máxima (pasajeros)" tipo="number" min="1" max="500" :valor="$bus->capacidad_maxima" required />
                 <x-campo nombre="estado" etiqueta="Estado" tipo="select" :valor="$bus->estado" required
-                         :opciones="collect(\App\Models\Bus::ESTADOS)->mapWithKeys(fn ($e) => [$e => ucfirst(str_replace('_', ' ', $e))])" />
+                         :opciones="collect($estados)->mapWithKeys(fn ($e) => [$e => ucfirst(str_replace('_', ' ', $e))])" />
             </div>
 
             <div class="flex justify-end border-t border-celeste-50 pt-5">

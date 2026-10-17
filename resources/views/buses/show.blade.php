@@ -9,7 +9,15 @@
 
     <section class="tarjeta max-w-2xl p-6">
         <dl class="grid gap-5 sm:grid-cols-2">
-            <div><dt class="text-xs text-slate-500">Estado</dt><dd class="mt-1"><x-estado :valor="$bus->estado" /></dd></div>
+            <div>
+                <dt class="text-xs text-slate-500">Estado</dt>
+                <dd class="mt-1">
+                    <x-estado :valor="$bus->estado" />
+                    @if ($bus->recorridoEnCurso)
+                        <a href="{{ route('recorridos.show', $bus->recorridoEnCurso) }}" class="ml-1 text-xs font-medium text-celeste-700 hover:underline">Recorrido #{{ $bus->recorridoEnCurso->id }}</a>
+                    @endif
+                </dd>
+            </div>
             <div>
                 <dt class="text-xs text-slate-500">Línea</dt>
                 <dd class="mt-1 font-medium">

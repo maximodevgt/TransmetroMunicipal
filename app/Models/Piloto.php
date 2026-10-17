@@ -11,6 +11,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['nombre', 'dpi', 'licencia', 'residencia', 'telefono', 'email', 'estado'])]
 class Piloto extends Model
 {
+    public function recorridos(): HasMany
+    {
+        return $this->hasMany(Recorrido::class, 'piloto_id');
+    }
+
     public function historialEducativo(): HasMany
     {
         return $this->hasMany(HistorialEducativo::class, 'piloto_id')->orderBy('anio');

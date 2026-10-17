@@ -30,6 +30,11 @@ class Estacion extends Model
         return $this->hasMany(Acceso::class, 'estacion_id');
     }
 
+    public function registrosPasajeros(): HasMany
+    {
+        return $this->hasMany(RegistroPasajeros::class, 'estacion_id');
+    }
+
     public function operadores(): HasMany
     {
         return $this->hasMany(User::class, 'estacion_id');
