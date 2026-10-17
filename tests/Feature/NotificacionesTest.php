@@ -123,13 +123,13 @@ class NotificacionesTest extends TestCase
             ->assertDontSee('window.confirm(', false);
     }
 
-    public function test_las_alertas_del_panel_tienen_ancla_para_el_boton_ver(): void
+    public function test_las_alertas_del_panel_llevan_a_su_detalle(): void
     {
         $alerta = Alerta::create(['estacion_id' => 8, 'tipo' => 'baja_ocupacion', 'mensaje' => 'Alerta de la prueba.', 'estado' => 'activa']);
 
         $this->actingAs($this->admin())
             ->get(route('dashboard'))
-            ->assertSee('id="alerta-'.$alerta->id.'"', false)
+            ->assertSee('href="'.route('alertas.show', $alerta).'"', false)
             ->assertSee('Baja ocupación');
     }
 }

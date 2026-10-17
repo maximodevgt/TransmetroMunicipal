@@ -23,6 +23,10 @@ class DashboardController extends Controller
             ->latest()
             ->get();
 
+        $bitacora = $usuario->esAdministrador()
+            ? Bitacora::with('user')->orderByDesc('id')->limit(6)->get()
+            : collect();
+
         return view('dashboard', [
             'totales' => [
                 'lineas' => Linea::count(),
@@ -34,9 +38,8 @@ class DashboardController extends Controller
             'resumenLineas' => DB::table('vw_resumen_lineas')->orderBy('id')->get(),
             'alertas' => $alertas,
             'estacion' => $usuario->estacion?->load('lineas', 'accesos.guardias'),
-            'bitacora' => $usuario->esAdministrador()
-                ? Bitacora::with('user')->orderByDesc('id')->limit(6)->get()
-                : collect(),
+            'bitacora' => $bitacora,
+            'enlacesBitacora' => Bitacora::enlaces($bitacora),
         ]);
     }
 }
