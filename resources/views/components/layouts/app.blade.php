@@ -7,6 +7,7 @@
         ['ruta' => 'lineas.index', 'activo' => 'lineas.*', 'texto' => 'Líneas', 'icono' => 'lineas', 'admin' => false],
         ['ruta' => 'estaciones.index', 'activo' => 'estaciones.*', 'texto' => 'Estaciones', 'icono' => 'estaciones', 'admin' => false],
         ['ruta' => 'buses.index', 'activo' => 'buses.*', 'texto' => 'Buses', 'icono' => 'buses', 'admin' => false],
+        ['ruta' => 'parqueos.index', 'activo' => 'parqueos.*', 'texto' => 'Parqueos', 'icono' => 'parqueos', 'admin' => false],
         ['ruta' => 'pilotos.index', 'activo' => 'pilotos.*', 'texto' => 'Pilotos', 'icono' => 'pilotos', 'admin' => true],
         ['ruta' => 'usuarios.index', 'activo' => 'usuarios.*', 'texto' => 'Usuarios', 'icono' => 'usuarios', 'admin' => true],
     ];

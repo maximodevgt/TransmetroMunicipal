@@ -47,14 +47,19 @@ class EstacionController extends Controller implements HasMiddleware
         } catch (QueryException $e) {
             return $this->volverConErrorBd($e);
         }
-        Bitacora::registrar('crear', $estacion, "Registro de la estacion {$estacion->nombre}");
+        Bitacora::registrar('crear', $estacion, "Registro de la estación {$estacion->nombre}");
 
         return redirect()->route('estaciones.show', $estacion)->with('ok', 'Estación creada.');
     }
 
     public function show(Estacion $estacion): View
     {
-        $estacion->load(['municipalidad', 'lineas', 'accesos.guardias', 'operadores']);
+        $estacion->load([
+            'municipalidad',
+            'lineas',
+            'accesos' => fn ($q) => $q->orderBy('nombre')->with(['guardias' => fn ($g) => $g->orderBy('nombre')]),
+            'operadores',
+        ]);
 
         return view('estaciones.show', ['estacion' => $estacion]);
     }
@@ -71,7 +76,7 @@ class EstacionController extends Controller implements HasMiddleware
         } catch (QueryException $e) {
             return $this->volverConErrorBd($e);
         }
-        Bitacora::registrar('editar', $estacion, "Actualizacion de la estacion {$estacion->nombre}");
+        Bitacora::registrar('editar', $estacion, "Actualización de la estación {$estacion->nombre}");
 
         return redirect()->route('estaciones.show', $estacion)->with('ok', 'Estación actualizada.');
     }
@@ -83,7 +88,7 @@ class EstacionController extends Controller implements HasMiddleware
         } catch (QueryException $e) {
             return back()->with('error', $this->mensajeErrorBd($e));
         }
-        Bitacora::registrar('eliminar', $estacion, "Eliminacion de la estacion {$estacion->nombre}");
+        Bitacora::registrar('eliminar', $estacion, "Eliminación de la estación {$estacion->nombre}");
 
         return redirect()->route('estaciones.index')->with('ok', 'Estación eliminada.');
     }

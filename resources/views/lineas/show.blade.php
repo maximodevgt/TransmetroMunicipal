@@ -9,7 +9,7 @@
         @endif
     </x-slot:acciones>
 
-    {{-- Indicadores de la linea --}}
+    {{-- Indicadores de la línea --}}
     <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
         <div class="tarjeta p-4"><p class="text-xs text-slate-500">Estado</p><x-estado :valor="$linea->estado" class="mt-1" /></div>
         <div class="tarjeta p-4"><p class="text-xs text-slate-500">Estaciones</p><p class="text-xl font-bold text-celeste-900">{{ $linea->estaciones->count() }}</p></div>
@@ -68,7 +68,7 @@
                                         @endunless
                                         <form method="POST" action="{{ route('lineas.estaciones.destroy', [$linea, $estacion]) }}" data-confirmar-titulo="¿Quitar {{ $estacion->nombre }} de la línea?" data-confirmar="Dejará de formar parte del recorrido de la línea {{ $linea->codigo }}." data-confirmar-boton="Sí, quitar">
                                             @csrf @method('DELETE')
-                                            <button class="rounded-lg p-1.5 text-rose-500 hover:bg-rose-50" title="Quitar de la línea"><x-icono nombre="eliminar" class="size-4" /></button>
+                                            <button class="rounded-lg p-1.5 text-rose-500 hover:bg-rose-50" title="Quitar de la línea" aria-label="Quitar {{ $estacion->nombre }} de la línea"><x-icono nombre="eliminar" class="size-4" /></button>
                                         </form>
                                     </div>
                                 @endif
@@ -114,4 +114,47 @@
             </table>
         </section>
     </div>
+
+    {{-- RF-04: accesos de todas las estaciones de la línea y sus guardias --}}
+    <section class="tarjeta mt-6 overflow-hidden">
+        <div class="px-5 py-4">
+            <h2 class="font-semibold text-celeste-900">Accesos y guardias de la línea</h2>
+            <p class="text-xs text-slate-500">{{ $linea->estaciones->sum(fn ($e) => $e->accesos->count()) }} accesos en {{ $linea->estaciones->count() }} estaciones</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="tabla">
+                <thead><tr><th>#</th><th>Estación</th><th>Acceso</th><th>Guardias</th></tr></thead>
+                <tbody>
+                    @forelse ($linea->estaciones as $estacion)
+                        @forelse ($estacion->accesos as $acceso)
+                            <tr>
+                                @if ($loop->first)
+                                    <td rowspan="{{ $estacion->accesos->count() }}" class="align-top text-slate-400">{{ $estacion->pivot->orden }}</td>
+                                    <td rowspan="{{ $estacion->accesos->count() }}" class="align-top">
+                                        <a href="{{ route('estaciones.show', $estacion) }}" class="font-medium text-celeste-700 hover:underline">{{ $estacion->nombre }}</a>
+                                    </td>
+                                @endif
+                                <td class="font-medium">{{ $acceso->nombre }}</td>
+                                <td>
+                                    @forelse ($acceso->guardias as $guardia)
+                                        <span class="block">{{ $guardia->nombre }} <span class="text-xs text-slate-500">· {{ \App\Models\Guardia::TURNOS[$guardia->turno] ?? $guardia->turno }}</span></span>
+                                    @empty
+                                        <span class="text-amber-600">Sin guardia (RN-11)</span>
+                                    @endforelse
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td class="text-slate-400">{{ $estacion->pivot->orden }}</td>
+                                <td><a href="{{ route('estaciones.show', $estacion) }}" class="font-medium text-celeste-700 hover:underline">{{ $estacion->nombre }}</a></td>
+                                <td colspan="2" class="text-amber-600">La estación no tiene accesos.</td>
+                            </tr>
+                        @endforelse
+                    @empty
+                        <tr><td colspan="4" class="text-slate-500">La línea aún no tiene estaciones.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </section>
 </x-layouts.app>

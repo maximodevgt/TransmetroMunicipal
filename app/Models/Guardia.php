@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable(['acceso_id', 'nombre', 'dpi', 'telefono', 'turno'])]
 class Guardia extends Model
 {
+    public const TURNOS = ['matutino' => 'Matutino', 'vespertino' => 'Vespertino', 'nocturno' => 'Nocturno'];
+
     public function acceso(): BelongsTo
     {
         return $this->belongsTo(Acceso::class, 'acceso_id');

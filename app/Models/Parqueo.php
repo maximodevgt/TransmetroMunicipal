@@ -15,4 +15,14 @@ class Parqueo extends Model
     {
         return $this->hasMany(Bus::class, 'parqueo_id');
     }
+
+    /**
+     * Porcentaje de ocupación (buses asignados / capacidad). Usa buses_count si se cargó con withCount.
+     */
+    public function ocupacion(): int
+    {
+        $buses = $this->buses_count ?? $this->buses()->count();
+
+        return $this->capacidad > 0 ? (int) round($buses / $this->capacidad * 100) : 0;
+    }
 }

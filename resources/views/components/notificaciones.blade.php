@@ -9,7 +9,7 @@
 
     // Mensajes que dejan los controladores con ->with('ok' | 'error' | 'advertencia' | 'info', ...).
     $iniciales = collect(['ok' => 'exito', 'error' => 'error', 'advertencia' => 'advertencia', 'info' => 'info'])
-        ->filter(fn ($tipo, $clave) => session()->has($clave))
+        ->filter(fn ($tipo, $clave) => filled(session($clave)))
         ->map(fn ($tipo, $clave) => ['tipo' => $tipo, 'mensaje' => session($clave)])
         ->values();
 

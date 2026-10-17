@@ -5,13 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Bitacora;
 use App\Models\Estacion;
 use App\Models\Linea;
+use App\Services\AsignacionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 /**
- * Administra el recorrido de una linea: que estaciones tiene, en que orden y a que distancia.
+ * Administra el recorrido de una línea: qué estaciones tiene, en qué orden y a qué distancia.
  */
 class LineaEstacionController extends Controller
 {
@@ -34,7 +35,7 @@ class LineaEstacionController extends Controller
         $orden = (int) ($datos['orden'] ?? $total + 1);
 
         DB::transaction(function () use ($linea, $datos, $orden) {
-            // Recorre hacia atras para no chocar con la llave unica (linea_id, orden).
+            // Recorre hacia atrás para no chocar con la llave única (linea_id, orden).
             DB::table('linea_estacion')
                 ->where('linea_id', $linea->id)
                 ->where('orden', '>=', $orden)
@@ -48,7 +49,7 @@ class LineaEstacionController extends Controller
         });
 
         $estacion = Estacion::find($datos['estacion_id']);
-        Bitacora::registrar('agregar_estacion', $linea, "Estacion {$estacion->nombre} agregada a {$linea->codigo} en posicion {$orden}");
+        Bitacora::registrar('agregar_estacion', $linea, "Estación {$estacion->nombre} agregada a {$linea->codigo} en la posición {$orden}");
 
         return back()->with('ok', "Estación {$estacion->nombre} agregada en la posición {$orden}.");
     }
@@ -65,26 +66,37 @@ class LineaEstacionController extends Controller
         return back()->with('ok', 'Distancia actualizada.');
     }
 
-    public function destroy(Linea $linea, Estacion $estacion): RedirectResponse
+    public function destroy(Linea $linea, Estacion $estacion, AsignacionService $asignacion): RedirectResponse
     {
         $orden = $linea->estaciones()->whereKey($estacion->id)->first()?->pivot->orden;
         abort_if($orden === null, 404);
 
-        DB::transaction(function () use ($linea, $estacion, $orden) {
+        $motivo = DB::transaction(function () use ($linea, $estacion, $orden, $asignacion) {
+            // Bloquea la línea mientras se revisa el nuevo máximo de buses.
+            Linea::whereKey($linea->id)->lockForUpdate()->first();
+            if ($motivo = $asignacion->motivoParaNoQuitarEstacion($linea, $estacion)) {
+                return $motivo;
+            }
+
             $linea->estaciones()->detach($estacion->id);
 
-            // Cierra el hueco en la numeracion, de menor a mayor por la llave unica.
+            // Cierra el hueco en la numeración, de menor a mayor por la llave única.
             DB::table('linea_estacion')
                 ->where('linea_id', $linea->id)
                 ->where('orden', '>', $orden)
                 ->orderBy('orden')
                 ->decrement('orden');
 
-            // La primera estacion del recorrido no tiene distancia anterior.
+            // La primera estación del recorrido no tiene distancia anterior.
             DB::table('linea_estacion')->where('linea_id', $linea->id)->where('orden', 1)->update(['distancia_anterior_km' => 0]);
+
+            return null;
         });
 
-        Bitacora::registrar('quitar_estacion', $linea, "Estacion {$estacion->nombre} retirada de {$linea->codigo}");
+        if ($motivo !== null) {
+            return back()->with('error', $motivo);
+        }
+        Bitacora::registrar('quitar_estacion', $linea, "Estación {$estacion->nombre} retirada de {$linea->codigo}");
 
         return back()->with('ok', "Estación {$estacion->nombre} retirada de la línea.");
     }
