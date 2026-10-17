@@ -10,9 +10,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Table('estaciones')]
-#[Fillable(['municipalidad_id', 'nombre', 'direccion', 'estado'])]
+#[Fillable(['municipalidad_id', 'nombre', 'direccion', 'latitud', 'longitud', 'estado'])]
 class Estacion extends Model
 {
+    protected function casts(): array
+    {
+        return ['latitud' => 'float', 'longitud' => 'float'];
+    }
+
+    public function tieneCoordenadas(): bool
+    {
+        return $this->latitud !== null && $this->longitud !== null;
+    }
+
     public function municipalidad(): BelongsTo
     {
         return $this->belongsTo(Municipalidad::class, 'municipalidad_id');
