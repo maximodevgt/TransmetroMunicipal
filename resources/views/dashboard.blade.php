@@ -138,7 +138,8 @@
                                 @endif
                                 <form method="POST" action="{{ route('alertas.atender', $alerta) }}">
                                     @csrf @method('PATCH')
-                                    <button class="btn-secundario w-full px-3 py-1.5 text-xs" aria-label="Atender la alerta {{ $alerta->id }}">Atender</button>
+                                    <button class="btn-secundario w-full px-3 py-1.5 text-xs" data-atender="Alerta #{{ $alerta->id }} · {{ $alerta->tipoTexto() }}"
+                                            aria-label="Atender la alerta {{ $alerta->id }}">Atender</button>
                                 </form>
                             </div>
                         </div>

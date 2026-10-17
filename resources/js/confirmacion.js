@@ -30,12 +30,18 @@ if (dialogo) {
         }
     });
 
-    // Mantiene el foco dentro de la ventana mientras está abierta.
-    dialogo.addEventListener('keydown', (evento) => {
+    atraparFoco(dialogo);
+}
+
+/**
+ * Mantiene el foco dentro de una ventana <dialog> mientras está abierta.
+ */
+export function atraparFoco(ventana) {
+    ventana.addEventListener('keydown', (evento) => {
         if (evento.key !== 'Tab') {
             return;
         }
-        const enfocables = [...dialogo.querySelectorAll('button:not([disabled]), a[href], input, select, textarea')];
+        const enfocables = [...ventana.querySelectorAll('button:not([disabled]), a[href], input, select, textarea')];
         const primero = enfocables[0];
         const ultimo = enfocables.at(-1);
 

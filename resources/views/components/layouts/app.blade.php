@@ -19,7 +19,7 @@
 @endphp
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="scroll-pt-16">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -84,7 +84,7 @@
 
     <main class="lg:pl-64">
         {{-- Barra superior en escritorio --}}
-        <div class="sticky top-0 z-20 hidden items-center justify-end gap-3 border-b border-celeste-100 bg-white/80 px-8 py-2 backdrop-blur lg:flex">
+        <div class="sticky top-0 z-20 hidden items-center justify-end gap-3 border-b border-celeste-100 bg-white px-8 py-2 shadow-sm shadow-celeste-900/5 lg:flex">
             <x-campana id="escritorio" />
             <span class="text-sm text-slate-600">{{ $usuario->name }}</span>
         </div>
@@ -108,5 +108,6 @@
 
     <x-notificaciones />
     <x-confirmacion />
+    <x-dialogo-atender />
 </body>
 </html>

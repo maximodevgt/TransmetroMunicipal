@@ -128,6 +128,34 @@ class SimuladorTest extends TestCase
             ->assertJson(['activa' => false, 'mensaje' => 'Simulación detenida: 2 recorridos finalizados y sus buses quedaron disponibles.']);
     }
 
+    public function test_las_alertas_simuladas_son_realistas(): void
+    {
+        $tasas = SimuladorService::alertasPorMinuto(6);
+
+        // Aun en el peor caso, menos de una baja ocupación por minuto con 6 buses...
+        $this->assertLessThan(1.0, $tasas['baja_ocupacion']);
+        // ...y de vez en cuando una de alta demanda (entre una cada 5 minutos y una por minuto).
+        $this->assertGreaterThanOrEqual(0.2, $tasas['alta_demanda']);
+        $this->assertLessThanOrEqual(1.0, $tasas['alta_demanda']);
+    }
+
+    public function test_pocas_llegadas_con_baja_ocupacion_y_la_terminal_casi_vacia(): void
+    {
+        $bajas = 0;
+        foreach (range(1, 4000) as $i) {
+            $pasajeros = SimuladorService::pasajerosAlLlegar(100, false);
+            $this->assertGreaterThanOrEqual(5, $pasajeros);
+            $this->assertLessThanOrEqual(95, $pasajeros);
+            $bajas += $pasajeros < 25 ? 1 : 0;
+        }
+        $this->assertGreaterThan(0.005, $bajas / 4000);
+        $this->assertLessThan(0.05, $bajas / 4000);
+
+        foreach (range(1, 200) as $i) {
+            $this->assertLessThanOrEqual(10, SimuladorService::pasajerosAlLlegar(100, true));
+        }
+    }
+
     public function test_avanzar_sin_simulacion_activa_no_cambia_nada(): void
     {
         $antes = Recorrido::count();
