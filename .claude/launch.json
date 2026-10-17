@@ -6,16 +6,6 @@
       "runtimeExecutable": "php",
       "runtimeArgs": ["artisan", "serve", "--port=8000"],
       "port": 8000
-    },
-    {
-      "name": "transmetro-pruebas",
-      "runtimeExecutable": "pwsh",
-      "runtimeArgs": [
-        "-NoProfile",
-        "-Command",
-        "$env:DB_DATABASE='transmetro_test'; Set-Location public; php -S 127.0.0.1:8001 ../vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php"
-      ],
-      "port": 8001
     }
   ]
 }

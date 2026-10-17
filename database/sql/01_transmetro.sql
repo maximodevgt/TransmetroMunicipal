@@ -392,7 +392,7 @@ BEGIN
     SELECT COUNT(*) INTO v_buses FROM buses WHERE linea_id = NEW.linea_id;
     IF v_buses >= v_estaciones * 2 THEN
       SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'La linea ya tiene el maximo de buses permitido (estaciones x 2).';
+        SET MESSAGE_TEXT = 'La línea ya tiene el máximo de buses permitido (estaciones × 2).';
     END IF;
   END IF;
 END$$
@@ -409,7 +409,7 @@ BEGIN
     SELECT COUNT(*) INTO v_buses FROM buses WHERE linea_id = NEW.linea_id;
     IF v_buses >= v_estaciones * 2 THEN
       SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'La linea ya tiene el maximo de buses permitido (estaciones x 2).';
+        SET MESSAGE_TEXT = 'La línea ya tiene el máximo de buses permitido (estaciones × 2).';
     END IF;
   END IF;
 END$$

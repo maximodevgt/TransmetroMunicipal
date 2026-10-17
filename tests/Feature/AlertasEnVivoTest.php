@@ -7,8 +7,8 @@ use App\Models\User;
 use Tests\TestCase;
 
 /**
- * GET /alertas/nuevas: campana y avisos en vivo. Datos del script: una alerta activa en Trébol (estación 8)
- * y una atendida en Centra Sur (estación 1).
+ * GET /alertas/nuevas: campana y avisos en vivo. Las cuentas se calculan desde la base porque
+ * transmetro es de desarrollo y sus alertas cambian.
  */
 class AlertasEnVivoTest extends TestCase
 {
@@ -82,15 +82,15 @@ class AlertasEnVivoTest extends TestCase
 
     public function test_el_operador_de_otra_estacion_no_ve_las_alertas_ajenas(): void
     {
-        $this->crearAlerta(8);
+        $ajena = $this->crearAlerta(8);
 
-        // Centra Sur (estación 1) solo tiene una alerta atendida en el script.
-        $this->actingAs($this->usuario('operador.centra.sur@transmetro.gt'))
+        $respuesta = $this->actingAs($this->usuario('operador.centra.sur@transmetro.gt'))
             ->getJson(route('alertas.nuevas', ['desde' => 0]))
             ->assertOk()
-            ->assertJsonPath('activas', 0)
-            ->assertJsonPath('nuevas', [])
-            ->assertJsonPath('recientes', []);
+            ->assertJsonPath('activas', Alerta::where('estado', 'activa')->where('estacion_id', 1)->count());
+
+        $this->assertNotContains($ajena->id, array_column($respuesta->json('nuevas'), 'id'));
+        $this->assertNotContains(8, Alerta::whereIn('id', array_column($respuesta->json('recientes'), 'id'))->pluck('estacion_id')->all());
     }
 
     public function test_el_panel_muestra_como_maximo_5_alertas_recientes(): void
