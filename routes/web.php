@@ -3,6 +3,7 @@
 use App\Http\Controllers\AccesoController;
 use App\Http\Controllers\AlertaController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BitacoraController;
 use App\Http\Controllers\BusController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EstacionController;
@@ -62,6 +63,8 @@ Route::middleware(['auth', 'activo'])->group(function () {
         Route::resource('pilotos', PilotoController::class)->parameters(['pilotos' => 'piloto']);
         Route::post('pilotos/{piloto}/historial', [HistorialEducativoController::class, 'store'])->name('pilotos.historial.store');
         Route::delete('pilotos/{piloto}/historial/{historial}', [HistorialEducativoController::class, 'destroy'])->name('pilotos.historial.destroy');
+
+        Route::get('bitacora', [BitacoraController::class, 'index'])->name('bitacora.index');
 
         Route::resource('usuarios', UsuarioController::class)->except(['show', 'destroy'])->parameters(['usuarios' => 'usuario']);
     });
