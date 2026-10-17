@@ -41,12 +41,26 @@ class Alerta extends Model
     }
 
     /**
-     * Alertas activas que puede ver el usuario: el administrador todas, el operador solo las de su estación.
+     * Alertas que puede ver el usuario: el administrador todas, el operador solo las de su estación.
      */
+    public function scopeVisiblesPara(Builder $query, User $usuario): void
+    {
+        $query->when(! $usuario->esAdministrador(), fn ($q) => $q->where('estacion_id', $usuario->estacion_id));
+    }
+
     public function scopeActivasPara(Builder $query, User $usuario): void
     {
-        $query->where('estado', 'activa')
-            ->when(! $usuario->esAdministrador(), fn ($q) => $q->where('estacion_id', $usuario->estacion_id));
+        $query->visiblesPara($usuario)->where('estado', 'activa');
+    }
+
+    public function puedeVerla(User $usuario): bool
+    {
+        return $usuario->esAdministrador() || ($usuario->estacion_id !== null && $this->estacion_id === $usuario->estacion_id);
+    }
+
+    public function activa(): bool
+    {
+        return $this->estado === 'activa';
     }
 
     public function tipoTexto(): string

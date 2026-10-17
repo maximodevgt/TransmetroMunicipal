@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\ReglaNegocioException;
 use App\Http\Middleware\VerificarRol;
 use App\Http\Middleware\VerificarUsuarioActivo;
 use Illuminate\Foundation\Application;
@@ -21,6 +22,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectUsersTo('/');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->render(fn (ReglaNegocioException $e, Request $request) => $request->expectsJson()
+            ? response()->json(['message' => $e->getMessage()], 422)
+            : back()->withInput()->with('error', $e->getMessage()));
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );

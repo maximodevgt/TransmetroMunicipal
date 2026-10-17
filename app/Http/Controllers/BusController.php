@@ -44,7 +44,7 @@ class BusController extends Controller implements HasMiddleware
         return view('buses.form', $this->datosFormulario(new Bus(['estado' => 'disponible'])));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, AsignacionService $asignacion): RedirectResponse
     {
         try {
             $bus = Bus::create($this->validar($request));
@@ -53,12 +53,12 @@ class BusController extends Controller implements HasMiddleware
         }
         Bitacora::registrar('crear', $bus, "Registro del bus {$bus->codigo}".($bus->linea ? " en la línea {$bus->linea->codigo}" : ''));
 
-        return redirect()->route('buses.show', $bus)->with('ok', 'Bus registrado.');
+        return $this->conMinimoRecuperado(redirect()->route('buses.show', $bus)->with('ok', 'Bus registrado.'), $bus->linea, $asignacion);
     }
 
     public function show(Bus $bus): View
     {
-        $bus->load(['linea', 'parqueo']);
+        $bus->load(['linea', 'parqueo', 'recorridoEnCurso']);
 
         return view('buses.show', ['bus' => $bus]);
     }
@@ -71,14 +71,19 @@ class BusController extends Controller implements HasMiddleware
     public function update(Request $request, Bus $bus, AsignacionService $asignacion): RedirectResponse
     {
         $lineaAnterior = $bus->linea;
+        $datos = $this->validar($request, $bus);
+        if ((string) ($datos['linea_id'] ?? '') !== (string) ($bus->linea_id ?? '')) {
+            $asignacion->validarBusSinRecorrido($bus, 'quitar o reasignar');
+        }
 
         try {
-            $bus->update($this->validar($request, $bus));
+            $bus->update($datos);
         } catch (QueryException $e) {
             return $this->volverConErrorBd($e);
         }
 
         $aviso = null;
+        $nueva = null;
         if ($bus->wasChanged('linea_id')) {
             $nueva = $bus->load('linea')->linea;
             Bitacora::registrar('asignar_linea', $bus, $nueva
@@ -90,11 +95,14 @@ class BusController extends Controller implements HasMiddleware
             Bitacora::registrar('editar', $bus, "Actualización del bus {$bus->codigo}");
         }
 
-        return $this->conAviso(redirect()->route('buses.show', $bus)->with('ok', 'Bus actualizado.'), $aviso);
+        $respuesta = $this->conAviso(redirect()->route('buses.show', $bus)->with('ok', 'Bus actualizado.'), $aviso);
+
+        return $this->conMinimoRecuperado($respuesta, $nueva, $asignacion);
     }
 
     public function destroy(Bus $bus, AsignacionService $asignacion): RedirectResponse
     {
+        $asignacion->validarBusSinRecorrido($bus, 'eliminar');
         $linea = $bus->linea;
 
         try {
@@ -112,17 +120,40 @@ class BusController extends Controller implements HasMiddleware
         return $aviso ? $respuesta->with('advertencia', $aviso) : $respuesta;
     }
 
+    private function conMinimoRecuperado(RedirectResponse $respuesta, ?Linea $linea, AsignacionService $asignacion): RedirectResponse
+    {
+        return $asignacion->revisarMinimoRecuperado($linea) > 0
+            ? $respuesta->with('info', "La línea {$linea->codigo} recuperó el mínimo de buses: su alerta de insuficiencia quedó atendida.")
+            : $respuesta;
+    }
+
     private function datosFormulario(Bus $bus): array
     {
+        $bus->loadMissing('recorridoEnCurso');
+
         return [
             'bus' => $bus,
+            'estados' => $this->estadosPermitidos($bus),
             'lineas' => Linea::withCount(['estaciones', 'buses'])->orderBy('id')->get(),
             'parqueos' => Parqueo::withCount('buses')->orderBy('nombre')->get(),
         ];
     }
 
+    /**
+     * El estado 'en_ruta' lo ponen y quitan los recorridos: un bus en ruta lo conserva
+     * hasta finalizar y los demás no pueden elegirlo a mano.
+     */
+    private function estadosPermitidos(?Bus $bus): array
+    {
+        return $bus?->exists && $bus->estaEnRuta()
+            ? ['en_ruta']
+            : array_values(array_diff(Bus::ESTADOS, ['en_ruta']));
+    }
+
     private function validar(Request $request, ?Bus $bus = null): array
     {
+        $enRuta = $this->estadosPermitidos($bus) === ['en_ruta'];
+
         // El máximo de buses por línea (estaciones × 2) lo valida el trigger en MySQL.
         return $request->validate([
             'linea_id' => ['nullable', 'exists:lineas,id'],
@@ -130,7 +161,11 @@ class BusController extends Controller implements HasMiddleware
             'placa' => ['required', 'string', 'max:10', Rule::unique('buses', 'placa')->ignore($bus)],
             'codigo' => ['required', 'string', 'max:20', Rule::unique('buses', 'codigo')->ignore($bus)],
             'capacidad_maxima' => ['required', 'integer', 'min:1', 'max:500'],
-            'estado' => ['required', Rule::in(Bus::ESTADOS)],
+            'estado' => ['required', Rule::in($this->estadosPermitidos($bus))],
+        ], [
+            'estado.in' => $enRuta
+                ? 'El bus está en ruta: su estado cambia al finalizar el recorrido.'
+                : 'Un bus solo queda en ruta al iniciar un recorrido.',
         ]);
     }
 }

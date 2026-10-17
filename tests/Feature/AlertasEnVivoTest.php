@@ -35,6 +35,9 @@ class AlertasEnVivoTest extends TestCase
 
     public function test_sin_desde_devuelve_el_estado_actual_sin_alertas_nuevas(): void
     {
+        // La base es de desarrollo: se asegura al menos una alerta activa para revisar la estructura.
+        $this->crearAlerta(8);
+
         $respuesta = $this->actingAs($this->usuario('admin@transmetro.gt'))
             ->getJson(route('alertas.nuevas'))
             ->assertOk()
@@ -63,7 +66,7 @@ class AlertasEnVivoTest extends TestCase
             ->assertJsonPath('nuevas.0.lugar', 'Estación Trébol · L12')
             ->assertJsonPath('ultimo_id', $nueva->id);
 
-        $this->assertSame(route('dashboard', ['alerta' => $nueva->id]).'#alerta-'.$nueva->id, $respuesta->json('nuevas.0.url'));
+        $this->assertSame(route('alertas.show', $nueva), $respuesta->json('nuevas.0.url'));
     }
 
     public function test_el_operador_solo_recibe_alertas_de_su_estacion(): void

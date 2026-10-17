@@ -2,4 +2,5 @@
 
 @section('codigo', '403')
 @section('titulo', 'Acceso restringido')
-@section('mensaje', 'Esta sección es solo para el administrador municipal.')
+{{-- Usa el motivo de abort(403, '...') cuando existe; si no, el mensaje general. --}}
+@section('mensaje', ($exception ?? null)?->getMessage() ?: 'No tiene permiso para realizar esta acción.')

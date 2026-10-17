@@ -12,8 +12,8 @@ use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
 /**
- * Administracion de usuarios: un administrador municipal y operadores asignados a estaciones.
- * Los usuarios no se eliminan (tienen historial en bitacora y transacciones): se desactivan.
+ * Administración de usuarios: un administrador municipal y operadores asignados a estaciones.
+ * Los usuarios no se eliminan (tienen historial en bitácora y transacciones): se desactivan.
  */
 class UsuarioController extends Controller
 {
@@ -65,7 +65,7 @@ class UsuarioController extends Controller
         }
 
         $usuario->update($datos);
-        Bitacora::registrar('editar', $usuario, "Actualizacion del usuario {$usuario->email}");
+        Bitacora::registrar('editar', $usuario, "Actualización del usuario {$usuario->email}");
 
         return redirect()->route('usuarios.index')->with('ok', "Usuario {$usuario->name} actualizado.");
     }
@@ -76,7 +76,7 @@ class UsuarioController extends Controller
             'name' => ['required', 'string', 'max:120'],
             'email' => ['required', 'email', 'max:150', Rule::unique('users', 'email')->ignore($usuario)],
             'rol' => ['required', Rule::in([User::ROL_ADMINISTRADOR, User::ROL_OPERADOR])],
-            // Cada operador pertenece a una estacion; el administrador municipal no.
+            // Cada operador pertenece a una estación; el administrador municipal no.
             'estacion_id' => ['nullable', 'required_if:rol,'.User::ROL_OPERADOR, 'exists:estaciones,id'],
             'password' => [$usuario ? 'nullable' : 'required', 'confirmed', Password::min(8)],
         ], [
