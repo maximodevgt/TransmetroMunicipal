@@ -1,13 +1,16 @@
 <?php
 
+use App\Http\Controllers\AccesoController;
 use App\Http\Controllers\AlertaController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BusController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EstacionController;
+use App\Http\Controllers\GuardiaController;
 use App\Http\Controllers\HistorialEducativoController;
 use App\Http\Controllers\LineaController;
 use App\Http\Controllers\LineaEstacionController;
+use App\Http\Controllers\ParqueoController;
 use App\Http\Controllers\PilotoController;
 use App\Http\Controllers\UsuarioController;
 use Illuminate\Support\Facades\Route;
@@ -26,11 +29,18 @@ Route::middleware(['auth', 'activo'])->group(function () {
     Route::resource('lineas', LineaController::class)->parameters(['lineas' => 'linea']);
     Route::resource('estaciones', EstacionController::class)->parameters(['estaciones' => 'estacion']);
     Route::resource('buses', BusController::class)->parameters(['buses' => 'bus']);
+    Route::resource('parqueos', ParqueoController::class)->parameters(['parqueos' => 'parqueo']);
 
     Route::middleware('rol:administrador')->group(function () {
         Route::post('lineas/{linea}/estaciones', [LineaEstacionController::class, 'store'])->name('lineas.estaciones.store');
         Route::put('lineas/{linea}/estaciones/{estacion}', [LineaEstacionController::class, 'update'])->name('lineas.estaciones.update');
         Route::delete('lineas/{linea}/estaciones/{estacion}', [LineaEstacionController::class, 'destroy'])->name('lineas.estaciones.destroy');
+
+        // Accesos dentro de su estación y guardias dentro de su acceso (rutas anidadas solo para crear).
+        Route::resource('estaciones.accesos', AccesoController::class)->shallow()->except(['index', 'show'])
+            ->parameters(['estaciones' => 'estacion', 'accesos' => 'acceso']);
+        Route::resource('accesos.guardias', GuardiaController::class)->shallow()->except(['index', 'show'])
+            ->parameters(['accesos' => 'acceso', 'guardias' => 'guardia']);
 
         Route::resource('pilotos', PilotoController::class)->parameters(['pilotos' => 'piloto']);
         Route::post('pilotos/{piloto}/historial', [HistorialEducativoController::class, 'store'])->name('pilotos.historial.store');

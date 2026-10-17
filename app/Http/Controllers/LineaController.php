@@ -40,14 +40,14 @@ class LineaController extends Controller implements HasMiddleware
         } catch (QueryException $e) {
             return $this->volverConErrorBd($e);
         }
-        Bitacora::registrar('crear', $linea, "Registro de la linea {$linea->codigo} - {$linea->nombre}");
+        Bitacora::registrar('crear', $linea, "Registro de la línea {$linea->codigo} - {$linea->nombre}");
 
         return redirect()->route('lineas.show', $linea)->with('ok', 'Línea creada. Ahora agregue sus estaciones.');
     }
 
     public function show(Linea $linea): View
     {
-        $linea->load(['municipalidad', 'estaciones', 'buses.parqueo']);
+        $linea->load(['municipalidad', 'estaciones.accesos.guardias', 'buses.parqueo']);
         $totalEstaciones = $linea->estaciones->count();
 
         return view('lineas.show', [
@@ -71,7 +71,7 @@ class LineaController extends Controller implements HasMiddleware
         } catch (QueryException $e) {
             return $this->volverConErrorBd($e);
         }
-        Bitacora::registrar('editar', $linea, "Actualizacion de la linea {$linea->codigo}");
+        Bitacora::registrar('editar', $linea, "Actualización de la línea {$linea->codigo}");
 
         return redirect()->route('lineas.show', $linea)->with('ok', 'Línea actualizada.');
     }
@@ -83,7 +83,7 @@ class LineaController extends Controller implements HasMiddleware
         } catch (QueryException $e) {
             return back()->with('error', $this->mensajeErrorBd($e));
         }
-        Bitacora::registrar('eliminar', $linea, "Eliminacion de la linea {$linea->codigo}");
+        Bitacora::registrar('eliminar', $linea, "Eliminación de la línea {$linea->codigo}");
 
         return redirect()->route('lineas.index')->with('ok', 'Línea eliminada.');
     }

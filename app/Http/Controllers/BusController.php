@@ -6,6 +6,7 @@ use App\Models\Bitacora;
 use App\Models\Bus;
 use App\Models\Linea;
 use App\Models\Parqueo;
+use App\Services\AsignacionService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -50,7 +51,7 @@ class BusController extends Controller implements HasMiddleware
         } catch (QueryException $e) {
             return $this->volverConErrorBd($e);
         }
-        Bitacora::registrar('crear', $bus, "Registro del bus {$bus->codigo}".($bus->linea ? " en la linea {$bus->linea->codigo}" : ''));
+        Bitacora::registrar('crear', $bus, "Registro del bus {$bus->codigo}".($bus->linea ? " en la línea {$bus->linea->codigo}" : ''));
 
         return redirect()->route('buses.show', $bus)->with('ok', 'Bus registrado.');
     }
@@ -67,33 +68,48 @@ class BusController extends Controller implements HasMiddleware
         return view('buses.form', $this->datosFormulario($bus));
     }
 
-    public function update(Request $request, Bus $bus): RedirectResponse
+    public function update(Request $request, Bus $bus, AsignacionService $asignacion): RedirectResponse
     {
+        $lineaAnterior = $bus->linea;
+
         try {
             $bus->update($this->validar($request, $bus));
         } catch (QueryException $e) {
             return $this->volverConErrorBd($e);
         }
 
+        $aviso = null;
         if ($bus->wasChanged('linea_id')) {
-            Bitacora::registrar('asignar_linea', $bus, "{$bus->codigo} asignado a la linea ".($bus->load('linea')->linea?->codigo ?? 'ninguna'));
+            $nueva = $bus->load('linea')->linea;
+            Bitacora::registrar('asignar_linea', $bus, $nueva
+                ? "{$bus->codigo} asignado a la línea {$nueva->codigo}"
+                : "{$bus->codigo} retirado de la línea {$lineaAnterior?->codigo}");
+            // Si la línea anterior queda con menos buses que estaciones, se guarda igual y se avisa.
+            $aviso = $asignacion->revisarMinimo($lineaAnterior);
         } else {
-            Bitacora::registrar('editar', $bus, "Actualizacion del bus {$bus->codigo}");
+            Bitacora::registrar('editar', $bus, "Actualización del bus {$bus->codigo}");
         }
 
-        return redirect()->route('buses.show', $bus)->with('ok', 'Bus actualizado.');
+        return $this->conAviso(redirect()->route('buses.show', $bus)->with('ok', 'Bus actualizado.'), $aviso);
     }
 
-    public function destroy(Bus $bus): RedirectResponse
+    public function destroy(Bus $bus, AsignacionService $asignacion): RedirectResponse
     {
+        $linea = $bus->linea;
+
         try {
             $bus->delete();
         } catch (QueryException $e) {
             return back()->with('error', $this->mensajeErrorBd($e));
         }
-        Bitacora::registrar('eliminar', $bus, "Eliminacion del bus {$bus->codigo}");
+        Bitacora::registrar('eliminar', $bus, "Eliminación del bus {$bus->codigo}");
 
-        return redirect()->route('buses.index')->with('ok', 'Bus eliminado.');
+        return $this->conAviso(redirect()->route('buses.index')->with('ok', 'Bus eliminado.'), $asignacion->revisarMinimo($linea));
+    }
+
+    private function conAviso(RedirectResponse $respuesta, ?string $aviso): RedirectResponse
+    {
+        return $aviso ? $respuesta->with('advertencia', $aviso) : $respuesta;
     }
 
     private function datosFormulario(Bus $bus): array
@@ -107,7 +123,7 @@ class BusController extends Controller implements HasMiddleware
 
     private function validar(Request $request, ?Bus $bus = null): array
     {
-        // El maximo de buses por linea (estaciones x 2) lo valida el trigger en MySQL.
+        // El máximo de buses por línea (estaciones × 2) lo valida el trigger en MySQL.
         return $request->validate([
             'linea_id' => ['nullable', 'exists:lineas,id'],
             'parqueo_id' => ['required', 'exists:parqueos,id'],
