@@ -8,6 +8,7 @@ use App\Models\Bus;
 use App\Models\Estacion;
 use App\Models\Linea;
 use App\Models\Piloto;
+use App\Services\ResolucionAlertaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -37,6 +38,7 @@ class DashboardController extends Controller
             'busesPorEstado' => Bus::select('estado', DB::raw('count(*) as total'))->groupBy('estado')->pluck('total', 'estado'),
             'resumenLineas' => DB::table('vw_resumen_lineas')->orderBy('id')->get(),
             'alertas' => $alertas,
+            'resolver' => $alertas->mapWithKeys(fn (Alerta $a) => [$a->id => app(ResolucionAlertaService::class)->accion($a, $usuario)]),
             'estacion' => $usuario->estacion?->load('lineas', 'accesos.guardias'),
             'bitacora' => $bitacora,
             'enlacesBitacora' => Bitacora::enlaces($bitacora),

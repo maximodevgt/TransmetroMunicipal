@@ -38,6 +38,8 @@ Route::middleware(['auth', 'activo'])->group(function () {
     Route::resource('recorridos', RecorridoController::class)->only(['index', 'create', 'store', 'show']);
     Route::post('recorridos/{recorrido}/llegadas', [RecorridoController::class, 'llegada'])->name('recorridos.llegadas.store');
     Route::patch('recorridos/{recorrido}/finalizar', [RecorridoController::class, 'finalizar'])->name('recorridos.finalizar');
+    Route::post('recorridos/{recorrido}/confirmar-espera', [RecorridoController::class, 'confirmarEspera'])->name('recorridos.confirmar-espera');
+    Route::post('buses/{bus}/asignar-linea', [BusController::class, 'asignarLinea'])->name('buses.asignar-linea');
 
     // Alertas: el operador solo ve y atiende las de su estación (lo revisa el controlador).
     Route::get('alertas', [AlertaController::class, 'index'])->name('alertas.index');
@@ -45,6 +47,7 @@ Route::middleware(['auth', 'activo'])->group(function () {
     Route::patch('alertas/{alerta}/atender', [AlertaController::class, 'atender'])->whereNumber('alerta')->name('alertas.atender');
 
     Route::middleware('rol:operador')->group(function () {
+        Route::post('alertas/{alerta}/solicitar-unidad', [AlertaController::class, 'solicitarUnidad'])->whereNumber('alerta')->name('alertas.solicitar-unidad');
         Route::get('mi-estacion', [MiEstacionController::class, 'show'])->name('mi-estacion');
         Route::post('mi-estacion/pasajeros', [MiEstacionController::class, 'registrarEspera'])->name('mi-estacion.pasajeros');
     });

@@ -31,12 +31,13 @@
     </div>
 
     <template data-plantilla-alerta>
-        <li>
-            <a class="block px-4 py-3 hover:bg-amber-50 focus:bg-amber-50 focus:outline-none">
+        <li class="relative px-4 py-3 hover:bg-amber-50">
+            <a data-alerta-ver class="enlace-extendido block">
                 <p data-alerta-tipo class="text-sm font-medium text-amber-800"></p>
                 <p data-alerta-lugar class="text-xs text-slate-500"></p>
                 <p data-alerta-mensaje class="mt-0.5 line-clamp-2 text-sm text-slate-600"></p>
             </a>
+            <a data-alerta-resolver hidden class="relative z-10 mt-2 inline-flex rounded-lg bg-celeste-500 px-2.5 py-1 text-xs font-semibold text-white hover:bg-celeste-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-celeste-400"></a>
         </li>
     </template>
 </div>

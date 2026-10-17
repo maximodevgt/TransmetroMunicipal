@@ -3,8 +3,31 @@
         <a href="{{ route('recorridos.index') }}" class="btn-secundario"><x-icono nombre="atras" class="size-4" /> Volver</a>
     </x-slot:acciones>
 
+    @if ($alerta)
+        <x-resolviendo :alerta="$alerta" class="max-w-2xl" />
+
+        {{-- Recorrido de la línea con la estación de la alerta resaltada --}}
+        <div class="mb-5 max-w-2xl" aria-label="Estaciones de la línea {{ $alerta->linea->codigo }}">
+            <p class="etiqueta">Estaciones de la línea {{ $alerta->linea->codigo }}</p>
+            <ol class="flex flex-wrap gap-1.5">
+                @foreach ($estacionesDeLaLinea as $estacion)
+                    <li @class([
+                        'insignia',
+                        'bg-amber-400 font-semibold text-amber-950 ring-2 ring-amber-300' => $estacion->id === $alerta->estacion_id,
+                        'bg-celeste-50 text-celeste-700' => $estacion->id !== $alerta->estacion_id,
+                    ]) @if ($estacion->id === $alerta->estacion_id) data-estacion-alerta aria-current="location" @endif>
+                        {{ $estacion->pivot->orden }}. {{ $estacion->nombre }}
+                    </li>
+                @endforeach
+            </ol>
+        </div>
+    @endif
+
     <form method="POST" action="{{ route('recorridos.store') }}" class="tarjeta max-w-2xl space-y-5 p-6">
         @csrf
+        @if ($alerta)
+            <input type="hidden" name="alerta" value="{{ $alerta->id }}">
+        @endif
 
         <x-campo nombre="linea_id" etiqueta="Línea" tipo="select" :valor="$lineaElegida" vacio="Seleccione…" required data-filtra="bus_id"
                  :opciones="$lineas->mapWithKeys(fn ($l) => [$l->id => $l->codigo.' · '.$l->nombre])" />

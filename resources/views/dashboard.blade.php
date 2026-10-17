@@ -115,10 +115,16 @@
                                 <p class="text-amber-700">{{ $alerta->mensaje }}</p>
                                 <p class="mt-1 text-xs text-amber-600">{{ $alerta->created_at?->format('d/m/Y H:i') }}</p>
                             </div>
-                            <form method="POST" action="{{ route('alertas.atender', $alerta) }}" class="relative z-10 shrink-0">
-                                @csrf @method('PATCH')
-                                <button class="btn-secundario px-3 py-1.5 text-xs" aria-label="Atender la alerta {{ $alerta->id }}">Atender</button>
-                            </form>
+                            <div class="relative z-10 flex shrink-0 flex-col gap-1.5">
+                                @if ($accion = $resolver[$alerta->id] ?? null)
+                                    <a href="{{ $accion['url'] }}" class="btn-primario px-3 py-1.5 text-xs whitespace-nowrap"
+                                       aria-label="{{ $accion['texto'] }}: alerta {{ $alerta->id }}">{{ $accion['texto'] }}</a>
+                                @endif
+                                <form method="POST" action="{{ route('alertas.atender', $alerta) }}">
+                                    @csrf @method('PATCH')
+                                    <button class="btn-secundario w-full px-3 py-1.5 text-xs" aria-label="Atender la alerta {{ $alerta->id }}">Atender</button>
+                                </form>
+                            </div>
                         </div>
                     </li>
                 @empty

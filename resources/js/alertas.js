@@ -77,7 +77,13 @@ function pintarCampana(campana, datos) {
 
     datos.recientes.forEach((alerta) => {
         const elemento = plantilla.content.firstElementChild.cloneNode(true);
-        elemento.querySelector('a').href = alerta.url;
+        elemento.querySelector('[data-alerta-ver]').href = alerta.url;
+        const resolver = elemento.querySelector('[data-alerta-resolver]');
+        if (alerta.resolver) {
+            resolver.href = alerta.resolver.url;
+            resolver.textContent = alerta.resolver.texto;
+            resolver.hidden = false;
+        }
         elemento.querySelector('[data-alerta-tipo]').textContent = alerta.tipo_texto;
         elemento.querySelector('[data-alerta-lugar]').textContent = [alerta.lugar, alerta.fecha].filter(Boolean).join(' · ');
         elemento.querySelector('[data-alerta-mensaje]').textContent = alerta.mensaje;
@@ -117,7 +123,7 @@ async function consultar() {
 
     datos.nuevas.forEach((alerta) => {
         notificar('advertencia', `Alerta: ${alerta.tipo_texto}`, [alerta.lugar, alerta.mensaje].filter(Boolean).join(' — '), {
-            enlace: { url: alerta.url, texto: 'Ver' },
+            enlaces: [alerta.resolver, { url: alerta.url, texto: 'Ver' }],
         });
     });
     if (datos.nuevas.length > 0 && sonidoActivo()) {
