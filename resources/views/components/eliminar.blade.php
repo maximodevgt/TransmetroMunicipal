@@ -1,6 +1,12 @@
-@props(['accion', 'confirmar' => '¿Seguro que desea eliminar este registro?', 'texto' => 'Eliminar'])
+@props([
+    'accion',
+    'confirmar' => 'Esta acción no se puede deshacer.',
+    'titulo' => '¿Eliminar registro?',
+    'boton' => 'Sí, eliminar',
+    'texto' => 'Eliminar',
+])
 
-<form method="POST" action="{{ $accion }}" data-confirmar="{{ $confirmar }}" {{ $attributes->only('class') }}>
+<form method="POST" action="{{ $accion }}" data-confirmar="{{ $confirmar }}" data-confirmar-titulo="{{ $titulo }}" data-confirmar-boton="{{ $boton }}" {{ $attributes->only('class') }}>
     @csrf
     @method('DELETE')
     <button class="btn-peligro">

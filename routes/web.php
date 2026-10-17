@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AlertaController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BusController;
 use App\Http\Controllers\DashboardController;
@@ -19,6 +20,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware(['auth', 'activo'])->group(function () {
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
     Route::get('/', DashboardController::class)->name('dashboard');
+    Route::get('/alertas/nuevas', [AlertaController::class, 'nuevas'])->middleware('throttle:60,1')->name('alertas.nuevas');
 
     // Lectura para todos los roles; crear, editar y eliminar solo administrador (ver middleware() de cada controlador).
     Route::resource('lineas', LineaController::class)->parameters(['lineas' => 'linea']);

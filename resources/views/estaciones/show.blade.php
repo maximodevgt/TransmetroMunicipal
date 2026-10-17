@@ -3,7 +3,7 @@
         <a href="{{ route('estaciones.index') }}" class="btn-secundario"><x-icono nombre="atras" class="size-4" /> Estaciones</a>
         @if (auth()->user()->esAdministrador())
             <a href="{{ route('estaciones.edit', $estacion) }}" class="btn-secundario"><x-icono nombre="editar" class="size-4" /> Editar</a>
-            <x-eliminar :accion="route('estaciones.destroy', $estacion)" confirmar="¿Eliminar la estación {{ $estacion->nombre }}?" />
+            <x-eliminar :accion="route('estaciones.destroy', $estacion)" titulo="¿Eliminar la estación {{ $estacion->nombre }}?" />
         @endif
     </x-slot:acciones>
 
