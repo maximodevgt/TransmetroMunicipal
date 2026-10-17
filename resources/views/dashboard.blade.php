@@ -1,7 +1,7 @@
 @php($esAdmin = auth()->user()->esAdministrador())
 
 @push('cabecera')
-    @vite('resources/js/seguimiento.js')
+    @vite(['resources/js/seguimiento.js', 'resources/js/graficas.js'])
 @endpush
 
 <x-layouts.app titulo="Panel" :subtitulo="'Hola, '.auth()->user()->name">
@@ -51,6 +51,38 @@
             </div>
         </a>
     </div>
+
+    {{-- Gráficas: cada barra, punto o porción lleva al reporte filtrado (el operador ve su estación) --}}
+    <section class="mt-6" data-graficas data-url-graficas="{{ route('panel.graficas') }}" aria-labelledby="titulo-graficas">
+        <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h2 id="titulo-graficas" class="flex items-center gap-2 font-semibold text-celeste-900"><x-icono nombre="reportes" class="text-celeste-500" /> Indicadores</h2>
+            <a href="{{ route('reportes.index') }}" class="text-sm font-medium text-celeste-600 hover:underline">Ver todos los reportes</a>
+        </div>
+        <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+            @foreach ([
+                ['espera', 'Pasajeros en espera por estación', $esAdmin ? 'Las 10 estaciones con más pasajeros (último registro)' : 'Último registro de su estación', route('reportes.show', 'estaciones')],
+                ['recorridos_hoy', 'Recorridos por hora', 'Iniciados hoy', route('reportes.show', ['recorridos', 'periodo' => 'hoy'])],
+                ['alertas_semana', 'Alertas por tipo', 'Últimos 7 días', route('reportes.show', ['alertas', 'periodo' => '7dias'])],
+                ['recaudacion_semana', 'Recaudación', 'Recargas y pasajes de los últimos 7 días', route('reportes.show', ['pagos', 'periodo' => '7dias'])],
+                ['ocupacion_lineas', 'Ocupación de buses por línea', 'Promedio de hoy (pasajeros a bordo contra capacidad)', route('reportes.show', ['recorridos', 'periodo' => 'hoy'])],
+            ] as [$clave, $titulo, $detalle, $url])
+                <article class="tarjeta flex flex-col p-5" data-grafica="{{ $clave }}">
+                    <div class="flex items-start justify-between gap-2">
+                        <div>
+                            <h3 class="font-semibold text-celeste-900">{{ $titulo }}</h3>
+                            <p class="text-xs text-slate-500">{{ $detalle }}</p>
+                        </div>
+                        <a href="{{ $url }}" class="shrink-0 text-xs font-medium text-celeste-600 hover:underline">Ver reporte</a>
+                    </div>
+                    <div class="relative mt-3 h-56">
+                        <canvas role="img" aria-label="{{ $titulo }}"></canvas>
+                        <p data-grafica-cargando class="absolute inset-0 flex items-center justify-center text-sm text-slate-400">Cargando…</p>
+                        <p data-grafica-vacia hidden class="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl bg-celeste-50 px-6 text-center text-sm text-celeste-800"></p>
+                    </div>
+                </article>
+            @endforeach
+        </div>
+    </section>
 
     {{-- Mini mapa con los buses en ruta --}}
     <section class="tarjeta mt-6 overflow-hidden">

@@ -9,7 +9,9 @@ use App\Models\Estacion;
 use App\Models\Linea;
 use App\Models\Piloto;
 use App\Models\Transaccion;
+use App\Services\GraficasService;
 use App\Services\ResolucionAlertaService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -45,6 +47,14 @@ class DashboardController extends Controller
             'enlacesBitacora' => Bitacora::enlaces($bitacora),
             'caja' => $this->cajaDeHoy($usuario),
         ]);
+    }
+
+    /**
+     * Datos de las gráficas del panel (el operador, solo los de su estación).
+     */
+    public function graficas(Request $request, GraficasService $graficas): JsonResponse
+    {
+        return response()->json(['graficas' => $graficas->para($request->user()), 'generado' => now()->format('H:i')]);
     }
 
     /**

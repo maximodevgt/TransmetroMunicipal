@@ -72,14 +72,23 @@ class Transaccion extends Model
 
     /**
      * Transacciones que puede ver el usuario: el administrador todas; el operador las de su estación.
+     * Los registros anteriores a la parte 4 no tienen estación: cuenta la de su acceso.
+     * Un operador sin estación no ve ninguna (0 no coincide con nada).
      */
     public function scopeVisiblesPara(Builder $query, User $usuario): void
     {
-        $query->when(! $usuario->esAdministrador(), fn ($q) => $q->where('estacion_id', $usuario->estacion_id));
+        $estacion = (int) $usuario->estacion_id;
+        $query->when(! $usuario->esAdministrador(), fn ($q) => $q->where(fn ($w) => $w
+            ->where('estacion_id', $estacion)
+            ->orWhere(fn ($v) => $v->whereNull('estacion_id')->whereIn('acceso_id', Acceso::where('estacion_id', $estacion)->select('id')))));
     }
 
     public function puedeVerla(User $usuario): bool
     {
-        return $usuario->esAdministrador() || $this->estacion_id === $usuario->estacion_id || $this->user_id === $usuario->id;
+        $estacion = $this->estacion_id ?? $this->acceso?->estacion_id;
+
+        return $usuario->esAdministrador()
+            || ($usuario->estacion_id !== null && $estacion === $usuario->estacion_id)
+            || $this->user_id === $usuario->id;
     }
 }

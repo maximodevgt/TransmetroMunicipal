@@ -1,6 +1,6 @@
 <x-layouts.app titulo="Tarjetas Transmetro" subtitulo="Emisión, saldo, recargas y bloqueos (pagos simulados)">
     <x-slot:acciones>
-        <a href="{{ route('torniquete.index') }}" class="btn-secundario"><x-icono nombre="torniquete" class="size-4" /> Torniquete</a>
+        <a href="{{ route('torniquete.index') }}" class="btn-secundario"><x-icono nombre="torniquete" class="size-4" /> Cobro de pasaje</a>
         <a href="{{ route('tarjetas.create') }}" class="btn-primario"><x-icono nombre="mas" class="size-4" /> Emitir tarjeta</a>
     </x-slot:acciones>
 

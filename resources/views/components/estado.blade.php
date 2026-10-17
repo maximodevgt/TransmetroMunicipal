@@ -18,6 +18,8 @@
         'vencida' => 'bg-slate-100 text-slate-500',
         'aprobada' => 'bg-emerald-100 text-emerald-700',
         'rechazada' => 'bg-rose-100 text-rose-700',
+        'cumple' => 'bg-emerald-100 text-emerald-700',
+        'faltan_buses' => 'bg-amber-100 text-amber-800',
     ];
 @endphp
 

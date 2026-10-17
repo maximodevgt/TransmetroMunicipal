@@ -10,7 +10,7 @@
     </x-slot:acciones>
 
     {{-- Comprobante imprimible: al imprimir se ocultan el menú y las barras --}}
-    <article class="tarjeta mx-auto max-w-md overflow-hidden print:shadow-none print:ring-0" data-comprobante>
+    <article class="tarjeta mx-auto max-w-md overflow-hidden print:shadow-none print:ring-0 [print-color-adjust:exact] [-webkit-print-color-adjust:exact]" data-comprobante>
         <header @class(['px-6 py-5 text-white', 'bg-gradient-to-r from-celeste-500 to-celeste-600' => $t->aprobada(), 'bg-gradient-to-r from-rose-500 to-rose-600' => ! $t->aprobada()])>
             <p class="text-xs tracking-widest uppercase opacity-90">Transmetro · Municipalidad de Guatemala</p>
             <p class="mt-1 text-lg font-bold">{{ $t->descripcion() }} {{ $t->aprobada() ? 'aprobada' : 'rechazada' }}</p>

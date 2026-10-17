@@ -17,11 +17,13 @@ use App\Http\Controllers\ParqueoController;
 use App\Http\Controllers\PilotoController;
 use App\Http\Controllers\RecargaController;
 use App\Http\Controllers\RecorridoController;
+use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\SeguimientoController;
 use App\Http\Controllers\TarjetaController;
 use App\Http\Controllers\TorniqueteController;
 use App\Http\Controllers\TransaccionController;
 use App\Http\Controllers\UsuarioController;
+use App\Reportes\Catalogo;
 use Illuminate\Support\Facades\Route;
 
 // Consulta pública de saldo (sin sesión), con límite de intentos.
@@ -38,6 +40,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware(['auth', 'activo'])->group(function () {
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
     Route::get('/', DashboardController::class)->name('dashboard');
+    Route::get('/panel/graficas', [DashboardController::class, 'graficas'])->middleware('throttle:60,1,graficas')->name('panel.graficas');
     Route::get('/alertas/nuevas', [AlertaController::class, 'nuevas'])->middleware('throttle:60,1,alertas')->name('alertas.nuevas');
 
     // Lectura para todos los roles; crear, editar y eliminar solo administrador (ver middleware() de cada controlador).
@@ -71,6 +74,14 @@ Route::middleware(['auth', 'activo'])->group(function () {
     Route::get('torniquete', [TorniqueteController::class, 'index'])->name('torniquete.index');
     Route::get('torniquete/{acceso}', [TorniqueteController::class, 'show'])->name('torniquete.show');
     Route::post('torniquete/{acceso}/validar', [TorniqueteController::class, 'validar'])->middleware('throttle:120,1,torniquete')->name('torniquete.validar');
+
+    // Reportes (ambos roles; el operador ve lo de su estación): pantalla, impresión y CSV.
+    Route::get('reportes', [ReporteController::class, 'index'])->name('reportes.index');
+    Route::whereIn('clave', array_keys(Catalogo::REPORTES))->group(function () {
+        Route::get('reportes/{clave}', [ReporteController::class, 'show'])->name('reportes.show');
+        Route::get('reportes/{clave}/imprimir', [ReporteController::class, 'imprimir'])->name('reportes.imprimir');
+        Route::get('reportes/{clave}/csv', [ReporteController::class, 'csv'])->middleware('throttle:30,1,reportes-csv')->name('reportes.csv');
+    });
 
     // Alertas: el operador solo ve y atiende las de su estación (lo revisa el controlador).
     Route::get('alertas', [AlertaController::class, 'index'])->name('alertas.index');

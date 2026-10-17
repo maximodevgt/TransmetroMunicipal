@@ -10,8 +10,9 @@
         ['ruta' => 'recorridos.index', 'activo' => 'recorridos.*', 'texto' => 'Recorridos', 'icono' => 'recorridos', 'rol' => null],
         ['ruta' => 'alertas.index', 'activo' => 'alertas.*', 'texto' => 'Alertas', 'icono' => 'alerta', 'rol' => null],
         ['ruta' => 'tarjetas.index', 'activo' => ['tarjetas.*', 'recargas.*'], 'texto' => 'Tarjetas', 'icono' => 'tarjeta', 'rol' => null],
-        ['ruta' => 'torniquete.index', 'activo' => 'torniquete.*', 'texto' => 'Torniquete', 'icono' => 'torniquete', 'rol' => null],
+        ['ruta' => 'torniquete.index', 'activo' => 'torniquete.*', 'texto' => 'Cobro de pasaje', 'icono' => 'torniquete', 'rol' => null],
         ['ruta' => 'transacciones.index', 'activo' => 'transacciones.*', 'texto' => 'Movimientos', 'icono' => 'movimientos', 'rol' => null],
+        ['ruta' => 'reportes.index', 'activo' => 'reportes.*', 'texto' => 'Reportes', 'icono' => 'reportes', 'rol' => null],
         ['ruta' => 'lineas.index', 'activo' => 'lineas.*', 'texto' => 'Líneas', 'icono' => 'lineas', 'rol' => null],
         ['ruta' => 'estaciones.index', 'activo' => 'estaciones.*', 'texto' => 'Estaciones', 'icono' => 'estaciones', 'rol' => null],
         ['ruta' => 'buses.index', 'activo' => 'buses.*', 'texto' => 'Buses', 'icono' => 'buses', 'rol' => null],
@@ -31,7 +32,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('cabecera')
 </head>
-<body class="min-h-screen bg-celeste-50 font-sans text-slate-800 antialiased">
+<body class="min-h-screen bg-celeste-50 font-sans text-slate-800 antialiased print:bg-white">
     {{-- Barra superior en móvil --}}
     <header class="sticky top-0 z-30 flex print:!hidden items-center justify-between bg-gradient-to-r from-celeste-400 to-celeste-500 px-4 py-3 text-white shadow lg:hidden">
         <span class="font-semibold">Transmetro Municipal</span>

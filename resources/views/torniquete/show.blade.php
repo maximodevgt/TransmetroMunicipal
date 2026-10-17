@@ -1,4 +1,4 @@
-<x-layouts.app titulo="Torniquete" :subtitulo="$acceso->estacion->nombre.' · '.$acceso->nombre.' · pasaje Q'.number_format($pasaje, 2)">
+<x-layouts.app titulo="Cobro de pasaje" :subtitulo="$acceso->estacion->nombre.' · '.$acceso->nombre.' · pasaje Q'.number_format($pasaje, 2)">
     <x-slot:acciones>
         <a href="{{ route('torniquete.index') }}" class="btn-secundario"><x-icono nombre="atras" class="size-4" /> Accesos</a>
     </x-slot:acciones>

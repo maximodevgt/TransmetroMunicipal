@@ -1,4 +1,4 @@
-<x-layouts.app titulo="Torniquete" subtitulo="Elija el acceso donde se simula el pago del pasaje">
+<x-layouts.app titulo="Cobro de pasaje" subtitulo="Simula el paso del pasajero por el torniquete de la estación">
     <div class="space-y-6">
         @forelse ($accesos as $estacion => $grupo)
             <section>

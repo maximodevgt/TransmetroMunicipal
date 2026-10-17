@@ -66,11 +66,19 @@ class Bitacora extends Model
 
     public static function registrar(string $accion, Model $registro, string $detalle): void
     {
+        static::anotar($accion, $registro->getTable(), $detalle, $registro->getKey());
+    }
+
+    /**
+     * Registro que no corresponde a una fila (por ejemplo, generar un reporte).
+     */
+    public static function anotar(string $accion, string $tabla, string $detalle, ?int $registroId = null): void
+    {
         static::create([
             'user_id' => Auth::id(),
             'accion' => $accion,
-            'tabla' => $registro->getTable(),
-            'registro_id' => $registro->getKey(),
+            'tabla' => $tabla,
+            'registro_id' => $registroId,
             'detalle' => mb_substr($detalle, 0, 255),
         ]);
     }
