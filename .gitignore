@@ -25,3 +25,8 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Configuración local de herramientas (no se versiona)
+/.claude/
+/CLAUDE.md
+/AGENTS.md
