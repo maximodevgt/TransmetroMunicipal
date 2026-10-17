@@ -99,6 +99,9 @@ class EstacionController extends Controller implements HasMiddleware
             'municipalidad_id' => ['required', 'exists:municipalidades,id'],
             'nombre' => ['required', 'string', 'max:100', Rule::unique('estaciones', 'nombre')->ignore($estacion)],
             'direccion' => ['nullable', 'string', 'max:200'],
+            // Coordenadas para el mapa de seguimiento: van juntas o ninguna.
+            'latitud' => ['nullable', 'required_with:longitud', 'numeric', 'between:-90,90'],
+            'longitud' => ['nullable', 'required_with:latitud', 'numeric', 'between:-180,180'],
             'estado' => ['required', Rule::in(['activa', 'inactiva'])],
         ]);
     }

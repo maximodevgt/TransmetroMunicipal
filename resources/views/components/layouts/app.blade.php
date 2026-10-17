@@ -6,6 +6,7 @@
     $menu = [
         ['ruta' => 'dashboard', 'activo' => 'dashboard', 'texto' => 'Panel', 'icono' => 'inicio', 'rol' => null],
         ['ruta' => 'mi-estacion', 'activo' => 'mi-estacion*', 'texto' => 'Mi estación', 'icono' => 'mi_estacion', 'rol' => 'operador'],
+        ['ruta' => 'seguimiento.index', 'activo' => 'seguimiento.*', 'texto' => 'Seguimiento en vivo', 'icono' => 'en_vivo', 'rol' => null],
         ['ruta' => 'recorridos.index', 'activo' => 'recorridos.*', 'texto' => 'Recorridos', 'icono' => 'recorridos', 'rol' => null],
         ['ruta' => 'alertas.index', 'activo' => 'alertas.*', 'texto' => 'Alertas', 'icono' => 'alerta', 'rol' => null],
         ['ruta' => 'lineas.index', 'activo' => 'lineas.*', 'texto' => 'Líneas', 'icono' => 'lineas', 'rol' => null],
@@ -23,7 +24,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $titulo }} · Transmetro Municipal</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @stack('cabecera')
 </head>
 <body class="min-h-screen bg-celeste-50 font-sans text-slate-800 antialiased">
     {{-- Barra superior en móvil --}}

@@ -15,6 +15,7 @@ use App\Http\Controllers\MiEstacionController;
 use App\Http\Controllers\ParqueoController;
 use App\Http\Controllers\PilotoController;
 use App\Http\Controllers\RecorridoController;
+use App\Http\Controllers\SeguimientoController;
 use App\Http\Controllers\UsuarioController;
 use Illuminate\Support\Facades\Route;
 
@@ -40,6 +41,12 @@ Route::middleware(['auth', 'activo'])->group(function () {
     Route::patch('recorridos/{recorrido}/finalizar', [RecorridoController::class, 'finalizar'])->name('recorridos.finalizar');
     Route::post('recorridos/{recorrido}/confirmar-espera', [RecorridoController::class, 'confirmarEspera'])->name('recorridos.confirmar-espera');
     Route::post('buses/{bus}/asignar-linea', [BusController::class, 'asignarLinea'])->name('buses.asignar-linea');
+
+    // Seguimiento en vivo: el mapa consulta los datos cada 3 s y avanza la simulación si está activa.
+    Route::get('seguimiento', [SeguimientoController::class, 'index'])->name('seguimiento.index');
+    Route::get('seguimiento/datos', [SeguimientoController::class, 'datos'])->middleware('throttle:120,1')->name('seguimiento.datos');
+    Route::post('seguimiento/avanzar', [SeguimientoController::class, 'avanzar'])->middleware('throttle:120,1')->name('seguimiento.avanzar');
+    Route::post('seguimiento/simulacion', [SeguimientoController::class, 'simulacion'])->middleware('rol:administrador')->name('seguimiento.simulacion');
 
     // Alertas: el operador solo ve y atiende las de su estación (lo revisa el controlador).
     Route::get('alertas', [AlertaController::class, 'index'])->name('alertas.index');

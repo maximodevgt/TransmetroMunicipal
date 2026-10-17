@@ -161,3 +161,86 @@
         animation: none;
     }
 }
+
+/* Seguimiento en vivo: marcadores del mapa */
+.estacion-marcador {
+    display: block;
+    width: 14px;
+    height: 14px;
+    border-radius: 9999px;
+    background: #fff;
+    border: 3px solid var(--color, var(--color-celeste-600));
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
+}
+
+.estacion-marcador.mi-estacion {
+    width: 22px;
+    height: 22px;
+    border-width: 5px;
+    outline: 3px solid var(--color-celeste-300);
+}
+
+.bus-marcador {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 26px;
+    padding: 0 8px 0 4px;
+    border-radius: 9999px;
+    background: var(--color, var(--color-celeste-600));
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 6px rgb(0 0 0 / 0.35);
+}
+
+.bus-marcador svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Alerta activa: pulso ámbar (advertencia) o rojo (alta demanda, insuficiencia) */
+.pulso-ambar,
+.pulso-rojo {
+    --pulso: rgb(245 158 11 / 0.65);
+    animation: pulso-alerta 1.6s ease-out infinite;
+}
+
+.pulso-rojo {
+    --pulso: rgb(225 29 72 / 0.7);
+}
+
+.estacion-marcador.pulso-ambar {
+    border-color: #f59e0b;
+}
+
+.estacion-marcador.pulso-rojo {
+    border-color: #e11d48;
+}
+
+@keyframes pulso-alerta {
+    0% {
+        box-shadow: 0 0 0 0 var(--pulso);
+    }
+    100% {
+        box-shadow: 0 0 0 14px rgb(0 0 0 / 0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pulso-ambar,
+    .pulso-rojo {
+        animation: none;
+        box-shadow: 0 0 0 4px var(--pulso);
+    }
+}
+
+.leaflet-container {
+    font-family: var(--font-sans);
+}
+
+.leaflet-popup-content-wrapper {
+    border-radius: 1rem;
+}

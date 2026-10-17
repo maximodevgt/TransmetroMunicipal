@@ -1,5 +1,9 @@
 @php($esAdmin = auth()->user()->esAdministrador())
 
+@push('cabecera')
+    @vite('resources/js/seguimiento.js')
+@endpush
+
 <x-layouts.app titulo="Panel" :subtitulo="'Hola, '.auth()->user()->name">
     {{-- Indicadores: la tarjeta completa lleva al módulo (Pilotos solo para el administrador) --}}
     <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -23,6 +27,18 @@
             </{{ $etiqueta }}>
         @endforeach
     </div>
+
+    {{-- Mini mapa con los buses en ruta --}}
+    <section class="tarjeta mt-6 overflow-hidden">
+        <div class="flex flex-wrap items-center justify-between gap-2 px-5 py-4">
+            <h2 class="flex items-center gap-2 font-semibold text-celeste-900"><x-icono nombre="en_vivo" class="text-celeste-500" /> En vivo</h2>
+            <a href="{{ route('seguimiento.index') }}" class="text-sm font-medium text-celeste-600 hover:underline">Abrir seguimiento en vivo</a>
+        </div>
+        <div data-mapa-seguimiento="mini"
+             data-url-datos="{{ route('seguimiento.datos') }}"
+             data-url-avanzar="{{ route('seguimiento.avanzar') }}"
+             class="isolate h-64" role="region" aria-label="Mini mapa de buses en ruta"></div>
+    </section>
 
     <div class="mt-6 grid gap-6 lg:grid-cols-3">
         {{-- Resumen por línea (vista vw_resumen_lineas): la fila lleva a la línea y el número de buses a sus buses --}}
