@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Alerta;
 use App\Models\Bus;
 use App\Models\Linea;
 use App\Models\User;
@@ -71,7 +72,7 @@ class NotificacionesTest extends TestCase
         $respuesta->assertOk();
         $this->assertSame([[
             'tipo' => 'error',
-            'mensaje' => 'La linea ya tiene el maximo de buses permitido (estaciones x 2).',
+            'mensaje' => 'La línea ya tiene el máximo de buses permitido (estaciones × 2).',
         ]], $this->avisos($respuesta));
         $this->assertDatabaseMissing('buses', ['codigo' => 'BUS-PRB']);
     }
@@ -112,21 +113,23 @@ class NotificacionesTest extends TestCase
 
     public function test_eliminar_pide_confirmacion_con_titulo_y_boton_propios(): void
     {
-        $bus = Bus::findOrFail(32);
+        $bus = Bus::create(['parqueo_id' => 1, 'placa' => 'PRB-002', 'codigo' => 'BUS-PRB2', 'capacidad_maxima' => 80, 'estado' => 'disponible']);
 
         $this->actingAs($this->admin())
             ->get(route('buses.show', $bus))
             ->assertOk()
-            ->assertSee('data-confirmar-titulo="¿Eliminar el bus BUS-132?"', false)
+            ->assertSee('data-confirmar-titulo="¿Eliminar el bus BUS-PRB2?"', false)
             ->assertSee('data-confirmar-boton="Sí, eliminar"', false)
             ->assertDontSee('window.confirm(', false);
     }
 
     public function test_las_alertas_del_panel_tienen_ancla_para_el_boton_ver(): void
     {
+        $alerta = Alerta::create(['estacion_id' => 8, 'tipo' => 'baja_ocupacion', 'mensaje' => 'Alerta de la prueba.', 'estado' => 'activa']);
+
         $this->actingAs($this->admin())
             ->get(route('dashboard'))
-            ->assertSee('id="alerta-1"', false)
-            ->assertSee('Alta demanda');
+            ->assertSee('id="alerta-'.$alerta->id.'"', false)
+            ->assertSee('Baja ocupación');
     }
 }

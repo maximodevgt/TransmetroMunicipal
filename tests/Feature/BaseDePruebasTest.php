@@ -8,13 +8,14 @@ use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 /**
- * Verifica que transmetro_test se cargó completa desde 02_transmetro_test.sql.
+ * Verifica que la base transmetro tiene la estructura de 01_transmetro.sql y que las pruebas no dejan datos.
  */
 class BaseDePruebasTest extends TestCase
 {
-    public function test_la_conexion_apunta_a_la_base_de_pruebas(): void
+    public function test_la_conexion_apunta_a_la_base_transmetro(): void
     {
-        $this->assertSame(self::BASE_DE_PRUEBAS, DB::connection()->getDatabaseName());
+        $this->assertSame('mysql', DB::connection()->getDriverName());
+        $this->assertSame('transmetro', DB::connection()->getDatabaseName());
     }
 
     public function test_existen_las_19_tablas_y_la_vista(): void
