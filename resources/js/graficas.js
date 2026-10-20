@@ -33,7 +33,7 @@ function opciones(grafica) {
         responsive: true,
         maintainAspectRatio: false,
         onHover: (evento, elementos) => {
-            evento.native.target.style.cursor = elementos.length ? 'pointer' : 'default';
+            evento.native.target.classList.toggle('cursor-pointer', elementos.length > 0);
         },
         plugins: {
             legend: { display: grafica.series.length > 1 || grafica.tipo === 'doughnut', position: 'bottom' },

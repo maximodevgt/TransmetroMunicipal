@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
  * Recaudación de la Tarjeta Transmetro por día y/o estación, separada por tipo
  * (recarga en efectivo, en línea y pasajes), con los rechazos y su motivo.
  *
- * La estación es la del movimiento o, en los registros anteriores a la parte 4, la del acceso.
+ * La estación es la del movimiento o, en los registros del script inicial (sin estación ni medio de pago), la del acceso.
  * Las recargas sin medio de pago son de ventanilla (antes solo había efectivo).
  * "Recargado" es el dinero que entra; los pasajes gastan saldo ya pagado y no se suman a él.
  */

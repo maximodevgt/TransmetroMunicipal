@@ -3,15 +3,8 @@
 .env
 .env.backup
 .env.production
-.phpactor.json
 .phpunit.result.cache
-/.codex
-/.cursor/
-/.idea
-/.nova
 /.phpunit.cache
-/.vscode
-/.zed
 /auth.json
 /node_modules
 /public/build
@@ -26,7 +19,19 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 
-# Configuración local de herramientas (no se versiona)
-/.claude/
-/CLAUDE.md
-/AGENTS.md
+# Configuración local del editor (no se versiona)
+# Carpetas ocultas de la raíz (ajustes del editor y de herramientas locales).
+/.*/
+# Archivos .md, .json, .yml y de reglas sueltos en la raíz, salvo los del proyecto.
+/*.md
+!/README.md
+/*.json
+!/composer.json
+!/package.json
+!/package-lock.json
+/.*.json
+/.*.yml
+/.*.yaml
+/.*rules
+# Instrucciones del editor dentro de .github, si se agrega esa carpeta.
+/.github/*.md

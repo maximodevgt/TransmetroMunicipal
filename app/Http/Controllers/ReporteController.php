@@ -54,8 +54,8 @@ class ReporteController extends Controller
 
         $html = view('reportes.imprimir', [
             ...$this->datos($reporte, $filtros, $usuario),
-            // cursor(): las filas se leen una a una mientras se dibuja la tabla.
-            'filas' => $reporte->consulta($filtros, $usuario)->cursor()->map(fn ($fila) => $reporte->preparar($fila)),
+            // Las filas se leen por partes de 500 mientras se dibuja la tabla (no se cargan todas en memoria).
+            'filas' => $reporte->consulta($filtros, $usuario)->lazy(500)->map(fn ($fila) => $reporte->preparar($fila)),
             'generado' => now(),
         ])->render();
         $this->anotar('imprimir_reporte', 'para imprimir', $reporte, $filtros, $usuario);

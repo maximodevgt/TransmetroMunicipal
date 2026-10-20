@@ -72,7 +72,7 @@ class Transaccion extends Model
 
     /**
      * Transacciones que puede ver el usuario: el administrador todas; el operador las de su estación.
-     * Los registros anteriores a la parte 4 no tienen estación: cuenta la de su acceso.
+     * Los registros del script inicial no tienen estación: cuenta la de su acceso.
      * Un operador sin estación no ve ninguna (0 no coincide con nada).
      */
     public function scopeVisiblesPara(Builder $query, User $usuario): void
