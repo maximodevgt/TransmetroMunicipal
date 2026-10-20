@@ -60,6 +60,10 @@ class UsuarioController extends Controller
             return back()->withInput()->with('error', 'No puede quitarse el rol de administrador ni desactivarse a sí mismo.');
         }
 
+        if ($motivo = $this->motivoDejaEstacionSinOperador($usuario, $datos)) {
+            return back()->withInput()->with('error', $motivo);
+        }
+
         if (blank($datos['password'] ?? null)) {
             unset($datos['password']);
         }
@@ -68,6 +72,24 @@ class UsuarioController extends Controller
         Bitacora::registrar('editar', $usuario, "Actualización del usuario {$usuario->email}");
 
         return redirect()->route('usuarios.index')->with('ok', "Usuario {$usuario->name} actualizado.");
+    }
+
+    /**
+     * RN-17: cada estación tiene un operador responsable. No se desactiva, cambia de estación ni de rol
+     * al último operador activo de una estación; primero se asigna otro.
+     */
+    private function motivoDejaEstacionSinOperador(User $usuario, array $datos): ?string
+    {
+        $estacion = $usuario->estacion;
+        $eraResponsable = $usuario->rol === User::ROL_OPERADOR && $usuario->activo && $estacion !== null;
+        $sigue = $datos['rol'] === User::ROL_OPERADOR && $datos['activo'] && (int) ($datos['estacion_id'] ?? 0) === $estacion?->id;
+        if (! $eraResponsable || $sigue) {
+            return null;
+        }
+
+        $otros = User::where('estacion_id', $estacion->id)->where('rol', User::ROL_OPERADOR)->where('activo', true)->whereKeyNot($usuario->id)->exists();
+
+        return $otros ? null : "La estación {$estacion->nombre} se quedaría sin operador (RN-17): asigne antes otro operador activo a esa estación.";
     }
 
     private function validar(Request $request, ?User $usuario = null): array

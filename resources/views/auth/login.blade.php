@@ -46,11 +46,28 @@
                 <form method="POST" action="{{ url('/login') }}" class="mt-8 space-y-5">
                     @csrf
                     <x-campo nombre="email" etiqueta="Correo" tipo="email" required autofocus autocomplete="username" placeholder="usuario@transmetro.gt" />
-                    <x-campo nombre="password" etiqueta="Contraseña" tipo="password" required autocomplete="current-password" />
+
+                    {{-- Contraseña con botón para mostrarla u ocultarla (no envía el formulario) --}}
+                    <div>
+                        <label for="campo_password" class="etiqueta">Contraseña</label>
+                        <div class="relative">
+                            <input id="campo_password" type="password" name="password" required autocomplete="current-password"
+                                   class="campo pr-11" @error('password') aria-invalid="true" @enderror>
+                            <button type="button" data-ver-clave="campo_password" aria-controls="campo_password" aria-pressed="false" aria-label="Mostrar contraseña"
+                                    class="absolute inset-y-0 right-0 flex items-center rounded-r-xl px-3 text-celeste-500 transition hover:text-celeste-700 focus-visible:ring-2 focus-visible:ring-celeste-400 focus-visible:outline-none">
+                                <x-icono nombre="ojo" class="size-5" data-icono-mostrar />
+                                <x-icono nombre="ojo_tachado" class="hidden size-5" data-icono-ocultar />
+                            </button>
+                        </div>
+                        @error('password')
+                            <p class="campo-error">{{ $message }}</p>
+                        @enderror
+                    </div>
 
                     <label class="flex items-center gap-2 text-sm text-slate-600">
-                        <input type="checkbox" name="remember" class="size-4 rounded border-celeste-300 text-celeste-500 focus:ring-celeste-400">
-                        Mantener la sesión iniciada
+                        <input type="checkbox" name="remember" value="1" @checked(old('remember'))
+                               class="size-4 rounded border-celeste-300 text-celeste-500 accent-celeste-500 focus:ring-celeste-400">
+                        Recordarme
                     </label>
 
                     <button class="btn-primario w-full py-2.5">Iniciar sesión</button>

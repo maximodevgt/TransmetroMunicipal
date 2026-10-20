@@ -41,6 +41,8 @@ return [
         'web' => [
             'driver' => 'session',
             'provider' => 'users',
+            // "Recordarme" dura 30 días (Laravel usa 400 por omisión).
+            'remember' => 60 * 24 * 30,
         ],
     ],
 

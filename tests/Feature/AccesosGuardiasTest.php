@@ -147,14 +147,20 @@ class AccesosGuardiasTest extends TestCase
     public function test_la_ficha_de_la_linea_muestra_los_accesos_y_guardias_de_sus_estaciones(): void
     {
         $linea = Linea::with('estaciones.accesos.guardias')->where('codigo', 'L12')->firstOrFail();
-        $acceso = $linea->estaciones->flatMap->accesos->firstOrFail();
-        $guardia = $acceso->guardias->firstOrFail();
+        $trebol = $this->operadorTrebol()->estacion_id;
+        $guardiaPropio = $linea->estaciones->firstWhere('id', $trebol)->accesos->flatMap->guardias->firstOrFail();
+        $guardiaAjeno = $linea->estaciones->firstWhere('id', '!=', $trebol)->accesos->flatMap->guardias->firstOrFail();
 
-        $this->actingAs($this->operadorTrebol())
-            ->get(route('lineas.show', $linea))
-            ->assertOk()
+        // El administrador ve los de todas las estaciones de la línea (RF-04).
+        $this->actingAs($this->administrador())->get(route('lineas.show', $linea))->assertOk()
             ->assertSee('Accesos y guardias de la línea')
-            ->assertSee($acceso->nombre)
-            ->assertSee($guardia->nombre);
+            ->assertSee($guardiaPropio->nombre)
+            ->assertSee($guardiaAjeno->nombre);
+
+        // El operador, solo los de su estación.
+        $this->actingAs($this->operadorTrebol())->get(route('lineas.show', $linea))->assertOk()
+            ->assertSee('Accesos y guardias de su estación')
+            ->assertSee($guardiaPropio->nombre)
+            ->assertDontSee($guardiaAjeno->nombre);
     }
 }

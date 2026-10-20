@@ -31,7 +31,7 @@
                         <tr>
                             <td class="text-slate-400">{{ $estacion->id }}</td>
                             <td>
-                                <a href="{{ route('estaciones.show', $estacion) }}" class="font-medium text-celeste-700 hover:underline">{{ $estacion->nombre }}</a>
+                                <x-enlace :url="$estacion->puedeVerla(auth()->user()) ? route('estaciones.show', $estacion) : null" class="font-medium text-celeste-700 hover:underline">{{ $estacion->nombre }}</x-enlace>
                                 <span class="block text-xs text-slate-500">{{ $estacion->direccion }}</span>
                             </td>
                             <td>

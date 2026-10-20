@@ -67,8 +67,10 @@
         @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
     }
 
+    /* relative: los textos sr-only (absolutos) de la tabla quedan dentro de su contenedor con desplazamiento
+       horizontal; sin esto se salían y ensanchaban la página en el teléfono. */
     .tabla {
-        @apply w-full text-left text-sm;
+        @apply relative w-full text-left text-sm;
     }
 
     .tabla thead th {
@@ -82,6 +84,29 @@
     .tabla tbody tr {
         @apply hover:bg-celeste-50/50;
     }
+}
+
+/* Lista de enlaces del menú lateral: barra de desplazamiento delgada y discreta, blanca sobre el celeste. */
+.menu-desplazable {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(255 255 255 / 0.45) transparent;
+}
+
+.menu-desplazable::-webkit-scrollbar {
+    width: 6px;
+}
+
+.menu-desplazable::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.menu-desplazable::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background: rgb(255 255 255 / 0.45);
+}
+
+.menu-desplazable::-webkit-scrollbar-thumb:hover {
+    background: rgb(255 255 255 / 0.7);
 }
 
 /* Notificaciones flotantes: entran desde la derecha (desde arriba en teléfono) y se encogen al salir. */

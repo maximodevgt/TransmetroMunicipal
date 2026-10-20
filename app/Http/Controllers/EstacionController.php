@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\ReglaNegocioException;
 use App\Models\Bitacora;
 use App\Models\Estacion;
+use App\Models\Linea;
 use App\Models\Municipalidad;
+use App\Services\AsignacionService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -37,23 +41,46 @@ class EstacionController extends Controller implements HasMiddleware
 
     public function create(): View
     {
-        return view('estaciones.form', ['estacion' => new Estacion(['estado' => 'activa']), 'municipalidades' => Municipalidad::orderBy('nombre')->get()]);
+        return view('estaciones.form', [
+            'estacion' => new Estacion(['estado' => 'activa']),
+            'municipalidades' => Municipalidad::orderBy('nombre')->get(),
+            'lineas' => Linea::orderBy('id')->get(),
+        ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    /**
+     * RN-02: la estación nace dentro de una línea (al final de su recorrido); después se puede mover o agregar a otras.
+     */
+    public function store(Request $request, AsignacionService $asignacion): RedirectResponse
     {
+        $datos = $this->validar($request);
+        $enLinea = $request->validate([
+            'linea_id' => ['required', 'exists:lineas,id'],
+            'distancia_anterior_km' => ['required', 'numeric', 'min:0', 'max:9999.99'],
+        ], [
+            'linea_id.required' => 'Elija la línea a la que pertenece la estación (cada estación debe estar al menos en una).',
+        ], ['linea_id' => 'línea', 'distancia_anterior_km' => 'distancia desde la estación anterior']);
+        $linea = Linea::findOrFail($enLinea['linea_id']);
+
         try {
-            $estacion = Estacion::create($this->validar($request));
+            [$estacion, $orden] = DB::transaction(function () use ($datos, $linea, $enLinea, $asignacion) {
+                $estacion = Estacion::create($datos);
+
+                return [$estacion, $asignacion->agregarEstacion($linea, $estacion, (float) $enLinea['distancia_anterior_km'])];
+            });
         } catch (QueryException $e) {
             return $this->volverConErrorBd($e);
         }
         Bitacora::registrar('crear', $estacion, "Registro de la estación {$estacion->nombre}");
+        Bitacora::registrar('agregar_estacion', $linea, "Estación {$estacion->nombre} agregada a {$linea->codigo} en la posición {$orden}");
 
         return redirect()->route('estaciones.show', $estacion)->with('ok', 'Estación creada.');
     }
 
-    public function show(Estacion $estacion): View
+    public function show(Request $request, Estacion $estacion): View
     {
+        abort_unless($estacion->puedeVerla($request->user()), 403, 'Solo puede ver la ficha de su estación.');
+
         $estacion->load([
             'municipalidad',
             'lineas',
@@ -81,14 +108,28 @@ class EstacionController extends Controller implements HasMiddleware
         return redirect()->route('estaciones.show', $estacion)->with('ok', 'Estación actualizada.');
     }
 
-    public function destroy(Estacion $estacion): RedirectResponse
+    /**
+     * Al eliminarla se retira de sus líneas (con la revisión del máximo de buses de cada una) y se borra;
+     * si algo lo impide (máximo de buses, accesos con guardias), no cambia nada.
+     */
+    public function destroy(Estacion $estacion, AsignacionService $asignacion): RedirectResponse
     {
+        $lineas = $estacion->lineas()->get();
         try {
-            $estacion->delete();
+            DB::transaction(function () use ($estacion, $lineas, $asignacion) {
+                foreach ($lineas as $linea) {
+                    if ($motivo = $asignacion->retirarEstacion($linea, $estacion, eliminandoEstacion: true)) {
+                        throw new ReglaNegocioException($motivo);
+                    }
+                }
+                $estacion->delete();
+            });
         } catch (QueryException $e) {
             return back()->with('error', $this->mensajeErrorBd($e));
         }
-        Bitacora::registrar('eliminar', $estacion, "Eliminación de la estación {$estacion->nombre}");
+        $lineas->each(fn (Linea $linea) => $asignacion->revisarMinimoRecuperado($linea));
+        Bitacora::registrar('eliminar', $estacion, "Eliminación de la estación {$estacion->nombre}"
+            .($lineas->isEmpty() ? '' : ' (retirada de '.$lineas->pluck('codigo')->join(', ').')'));
 
         return redirect()->route('estaciones.index')->with('ok', 'Estación eliminada.');
     }

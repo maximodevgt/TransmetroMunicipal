@@ -157,7 +157,8 @@ class AsignacionBusesTest extends TestCase
         $l2 = Linea::where('codigo', 'L2')->firstOrFail();
         $estaciones = $l2->estaciones()->count();
         $this->dejarBuses($l2, ($estaciones - 1) * 2);
-        $ultima = $l2->estaciones()->get()->last();
+        // Una estación que también está en otra línea: así no la detiene RN-02 (ninguna estación sin línea).
+        $ultima = $l2->estaciones()->get()->first(fn ($e) => $e->lineas()->count() > 1);
 
         $this->actingAs($this->administrador())
             ->delete(route('lineas.estaciones.destroy', [$l2, $ultima]))

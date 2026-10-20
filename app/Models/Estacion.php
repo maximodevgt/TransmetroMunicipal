@@ -18,6 +18,14 @@ class Estacion extends Model
         return ['latitud' => 'float', 'longitud' => 'float'];
     }
 
+    /**
+     * Ficha de la estación (accesos, guardias, operador): el administrador todas; el operador solo la suya.
+     */
+    public function puedeVerla(User $usuario): bool
+    {
+        return $usuario->esAdministrador() || ($usuario->estacion_id !== null && $this->id === $usuario->estacion_id);
+    }
+
     public function tieneCoordenadas(): bool
     {
         return $this->latitud !== null && $this->longitud !== null;

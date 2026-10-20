@@ -15,7 +15,7 @@
             <table class="tabla">
                 <thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estación</th><th>Estado</th><th></th></tr></thead>
                 <tbody>
-                    @foreach ($usuarios as $usuario)
+                    @forelse ($usuarios as $usuario)
                         <tr>
                             <td class="font-medium">{{ $usuario->name }}</td>
                             <td>{{ $usuario->email }}</td>
@@ -25,10 +25,12 @@
                             <td>{{ $usuario->estacion?->nombre ?? '—' }}</td>
                             <td><x-estado :valor="$usuario->activo ? 'activo' : 'inactivo'" /></td>
                             <td class="text-right">
-                                <a href="{{ route('usuarios.edit', $usuario) }}" class="inline-flex rounded-lg p-1.5 text-celeste-600 hover:bg-celeste-50" title="Editar"><x-icono nombre="editar" class="size-4" /></a>
+                                <a href="{{ route('usuarios.edit', $usuario) }}" class="inline-flex rounded-lg p-1.5 text-celeste-600 hover:bg-celeste-50" title="Editar" aria-label="Editar a {{ $usuario->name }}"><x-icono nombre="editar" class="size-4" /></a>
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr><td colspan="6" class="text-slate-500">No hay usuarios con ese filtro.</td></tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>

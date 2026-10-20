@@ -45,8 +45,9 @@
     </header>
 
     {{-- Menú lateral --}}
-    <aside data-menu class="fixed inset-y-0 left-0 z-40 hidden w-64 print:!hidden flex-col bg-gradient-to-b from-celeste-400 via-celeste-500 to-celeste-600 text-white shadow-xl lg:flex">
-        <div class="flex items-center gap-3 px-6 py-6">
+    {{-- Menú: ocupa la altura de la pantalla; el logo y la tarjeta del usuario quedan fijos y solo la lista de enlaces se desplaza. --}}
+    <aside data-menu class="fixed inset-y-0 left-0 z-40 hidden h-dvh w-64 print:!hidden flex-col bg-gradient-to-b from-celeste-400 via-celeste-500 to-celeste-600 text-white shadow-xl lg:flex">
+        <div class="flex shrink-0 items-center gap-3 px-6 py-6">
             <div class="flex size-11 items-center justify-center rounded-2xl bg-white text-celeste-500 shadow">
                 <x-icono nombre="buses" class="size-6" />
             </div>
@@ -56,14 +57,15 @@
             </div>
         </div>
 
-        <nav class="flex-1 space-y-1 px-3">
+        <nav data-menu-enlaces aria-label="Menú principal" class="menu-desplazable relative min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain px-3 pb-2">
             @foreach ($menu as $item)
                 @continue($item['rol'] !== null && $item['rol'] !== $usuario->rol)
-                <a href="{{ route($item['ruta']) }}"
+                @php($activo = request()->routeIs(...(array) $item['activo']))
+                <a href="{{ route($item['ruta']) }}" @if ($activo) aria-current="page" @endif
                    @class([
                        'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition',
-                       'bg-white text-celeste-600 shadow' => request()->routeIs(...(array) $item['activo']),
-                       'text-white/90 hover:bg-white/15' => ! request()->routeIs(...(array) $item['activo']),
+                       'bg-white text-celeste-600 shadow' => $activo,
+                       'text-white/90 hover:bg-white/15' => ! $activo,
                    ])>
                     <x-icono :nombre="$item['icono']" />
                     {{ $item['texto'] }}
@@ -71,7 +73,7 @@
             @endforeach
         </nav>
 
-        <div class="m-3 rounded-2xl bg-white/15 p-4">
+        <div class="m-3 shrink-0 rounded-2xl bg-white/15 p-4">
             <p class="truncate text-sm font-semibold">{{ $usuario->name }}</p>
             <p class="truncate text-xs text-white/80">
                 {{ ucfirst($usuario->rol) }}@if ($usuario->estacion) · {{ $usuario->estacion->nombre }}@endif

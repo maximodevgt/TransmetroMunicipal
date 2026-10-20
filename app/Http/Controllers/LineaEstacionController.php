@@ -8,7 +8,6 @@ use App\Models\Linea;
 use App\Services\AsignacionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 /**
@@ -16,7 +15,7 @@ use Illuminate\Validation\Rule;
  */
 class LineaEstacionController extends Controller
 {
-    public function store(Request $request, Linea $linea): RedirectResponse
+    public function store(Request $request, Linea $linea, AsignacionService $asignacion): RedirectResponse
     {
         $total = $linea->estaciones()->count();
 
@@ -32,23 +31,9 @@ class LineaEstacionController extends Controller
             'estacion_id.unique' => 'La estación ya pertenece a esta línea.',
         ]);
 
-        $orden = (int) ($datos['orden'] ?? $total + 1);
+        $estacion = Estacion::findOrFail($datos['estacion_id']);
+        $orden = $asignacion->agregarEstacion($linea, $estacion, (float) $datos['distancia_anterior_km'], isset($datos['orden']) ? (int) $datos['orden'] : null);
 
-        DB::transaction(function () use ($linea, $datos, $orden) {
-            // Recorre hacia atrás para no chocar con la llave única (linea_id, orden).
-            DB::table('linea_estacion')
-                ->where('linea_id', $linea->id)
-                ->where('orden', '>=', $orden)
-                ->orderByDesc('orden')
-                ->increment('orden');
-
-            $linea->estaciones()->attach($datos['estacion_id'], [
-                'orden' => $orden,
-                'distancia_anterior_km' => $datos['distancia_anterior_km'],
-            ]);
-        });
-
-        $estacion = Estacion::find($datos['estacion_id']);
         Bitacora::registrar('agregar_estacion', $linea, "Estación {$estacion->nombre} agregada a {$linea->codigo} en la posición {$orden}");
 
         return back()->with('ok', "Estación {$estacion->nombre} agregada en la posición {$orden}.");
@@ -66,32 +51,28 @@ class LineaEstacionController extends Controller
         return back()->with('ok', 'Distancia actualizada.');
     }
 
+    /**
+     * RF-03: subir o bajar la estación en el recorrido de la línea.
+     */
+    public function mover(Request $request, Linea $linea, Estacion $estacion, AsignacionService $asignacion): RedirectResponse
+    {
+        abort_unless($linea->estaciones()->whereKey($estacion->id)->exists(), 404);
+        $total = $linea->estaciones()->count();
+        $datos = $request->validate(['posicion' => ['required', 'integer', 'min:1', 'max:'.$total]], [], ['posicion' => 'posición']);
+
+        if ($motivo = $asignacion->moverEstacion($linea, $estacion, (int) $datos['posicion'])) {
+            return back()->with('error', $motivo);
+        }
+        Bitacora::registrar('mover_estacion', $linea, "Estación {$estacion->nombre} movida a la posición {$datos['posicion']} de {$linea->codigo}");
+
+        return back()->with('ok', "{$estacion->nombre} quedó en la posición {$datos['posicion']}.");
+    }
+
     public function destroy(Linea $linea, Estacion $estacion, AsignacionService $asignacion): RedirectResponse
     {
-        $orden = $linea->estaciones()->whereKey($estacion->id)->first()?->pivot->orden;
-        abort_if($orden === null, 404);
+        abort_unless($linea->estaciones()->whereKey($estacion->id)->exists(), 404);
 
-        $motivo = DB::transaction(function () use ($linea, $estacion, $orden, $asignacion) {
-            // Bloquea la línea mientras se revisa el nuevo máximo de buses.
-            Linea::whereKey($linea->id)->lockForUpdate()->first();
-            if ($motivo = $asignacion->motivoParaNoQuitarEstacion($linea, $estacion)) {
-                return $motivo;
-            }
-
-            $linea->estaciones()->detach($estacion->id);
-
-            // Cierra el hueco en la numeración, de menor a mayor por la llave única.
-            DB::table('linea_estacion')
-                ->where('linea_id', $linea->id)
-                ->where('orden', '>', $orden)
-                ->orderBy('orden')
-                ->decrement('orden');
-
-            // La primera estación del recorrido no tiene distancia anterior.
-            DB::table('linea_estacion')->where('linea_id', $linea->id)->where('orden', 1)->update(['distancia_anterior_km' => 0]);
-
-            return null;
-        });
+        $motivo = $asignacion->retirarEstacion($linea, $estacion);
 
         if ($motivo !== null) {
             return back()->with('error', $motivo);

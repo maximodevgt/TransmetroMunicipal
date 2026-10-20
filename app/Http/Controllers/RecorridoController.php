@@ -34,8 +34,10 @@ class RecorridoController extends Controller implements HasMiddleware
 
         return view('recorridos.index', [
             'filtros' => $filtros,
-            'lineas' => Linea::orderBy('id')->get(),
+            'lineas' => Linea::query()->when(! $request->user()->esAdministrador(), fn ($q) => $q->whereIn('id', Recorrido::lineasDe($request->user())))
+                ->orderBy('id')->get(),
             'recorridos' => Recorrido::with(['linea', 'bus', 'piloto'])->withCount('visitas')
+                ->visiblesPara($request->user())
                 ->when(ctype_digit((string) ($filtros['linea_id'] ?? '')), fn ($q) => $q->where('linea_id', $filtros['linea_id']))
                 ->when(array_key_exists($filtros['estado'] ?? '', Recorrido::ESTADOS), fn ($q) => $q->where('estado', $filtros['estado']))
                 ->when($fecha, fn ($q) => $q->whereDate('inicio', $fecha))
@@ -98,6 +100,7 @@ class RecorridoController extends Controller implements HasMiddleware
 
     public function show(Request $request, Recorrido $recorrido, ResolucionAlertaService $resolucion): View
     {
+        abort_unless($recorrido->puedeVerlo($request->user()), 403, 'Solo puede ver los recorridos de las líneas de su estación.');
         $recorrido->load(['linea.estaciones', 'bus', 'piloto', 'visitas']);
 
         // Con ?alerta=ID (baja ocupación de este bus) se ofrece confirmar la espera en la llegada que la causó.
@@ -121,6 +124,7 @@ class RecorridoController extends Controller implements HasMiddleware
      */
     public function confirmarEspera(Request $request, Recorrido $recorrido, ResolucionAlertaService $resolucion): RedirectResponse
     {
+        abort_unless($recorrido->puedeVerlo($request->user()), 403, 'Solo puede resolver los recorridos de las líneas de su estación.');
         $alerta = $resolucion->exigir($request, 'baja_ocupacion')
             ?? throw new ReglaNegocioException('Indique la alerta de baja ocupación que se resuelve.');
 
@@ -150,7 +154,7 @@ class RecorridoController extends Controller implements HasMiddleware
             'pasajeros_a_bordo' => ['required', 'integer', 'min:0'],
             'hora_llegada' => ['nullable', 'date'],
         ]);
-        abort_if(! $usuario->esAdministrador() && (int) $datos['estacion_id'] !== $usuario->estacion_id, 403, 'Solo puede registrar llegadas en su estación.');
+        abort_if(! $usuario->esAdministrador() && ((int) $datos['estacion_id'] !== $usuario->estacion_id || ! $recorrido->puedeVerlo($usuario)), 403, 'Solo puede registrar llegadas en su estación.');
 
         $estacion = Estacion::findOrFail($datos['estacion_id']);
         $hora = filled($datos['hora_llegada'] ?? null) ? Carbon::parse($datos['hora_llegada']) : null;

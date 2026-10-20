@@ -271,8 +271,8 @@ class ResolverAlertasTest extends TestCase
         $this->actingAs($this->operadorTrebol());
 
         $this->post(route('alertas.solicitar-unidad', $ajena))->assertForbidden();
-        $this->post(route('recorridos.confirmar-espera', $recorrido), ['alerta' => $bajaAjena->id])
-            ->assertSessionHas('error', 'La alerta indicada no existe, ya fue atendida o no corresponde a esta acción.');
+        // El recorrido es de una línea que no pasa por su estación: ni siquiera lo puede abrir.
+        $this->post(route('recorridos.confirmar-espera', $recorrido), ['alerta' => $bajaAjena->id])->assertForbidden();
 
         $this->assertSame('activa', $ajena->fresh()->estado);
         $this->assertSame('activa', $bajaAjena->fresh()->estado);

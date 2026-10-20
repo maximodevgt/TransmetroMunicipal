@@ -5,6 +5,20 @@ import './alertas';
 import './recargas';
 import './torniquete';
 
+// Mostrar u ocultar la contraseña: <button data-ver-clave="id-del-campo"> (type="button": no envía el formulario).
+document.querySelectorAll('[data-ver-clave]').forEach((boton) => {
+    const campo = document.getElementById(boton.dataset.verClave);
+    boton.addEventListener('click', () => {
+        const mostrar = campo.type === 'password';
+        campo.type = mostrar ? 'text' : 'password';
+        boton.setAttribute('aria-pressed', String(mostrar));
+        boton.setAttribute('aria-label', mostrar ? 'Ocultar contraseña' : 'Mostrar contraseña');
+        boton.querySelector('[data-icono-mostrar]').classList.toggle('hidden', mostrar);
+        boton.querySelector('[data-icono-ocultar]').classList.toggle('hidden', !mostrar);
+        campo.focus();
+    });
+});
+
 // Menú lateral en pantallas pequeñas.
 const menu = document.querySelector('[data-menu]');
 const fondo = document.querySelector('[data-menu-fondo]');
@@ -15,7 +29,20 @@ function alternarMenu(abrir) {
     fondo?.classList.toggle('hidden', !abrir);
 }
 
-document.querySelector('[data-menu-toggle]')?.addEventListener('click', () => alternarMenu(menu.classList.contains('hidden')));
+// Si el enlace activo queda fuera de la parte visible del menú (pantallas bajas o con zoom), se desplaza hasta él.
+function mostrarEnlaceActivo() {
+    const lista = menu?.querySelector('[data-menu-enlaces]');
+    const activo = lista?.querySelector('[aria-current="page"]');
+    if (!activo || lista.clientHeight === 0) return;
+    const fuera = activo.offsetTop < lista.scrollTop || activo.offsetTop + activo.offsetHeight > lista.scrollTop + lista.clientHeight;
+    if (fuera) activo.scrollIntoView({ block: 'center', inline: 'nearest' });
+}
+mostrarEnlaceActivo();
+
+document.querySelector('[data-menu-toggle]')?.addEventListener('click', () => {
+    alternarMenu(menu.classList.contains('hidden'));
+    mostrarEnlaceActivo();
+});
 fondo?.addEventListener('click', () => alternarMenu(false));
 
 // Cuenta regresiva: <x data-cuenta-regresiva="ISO-8601"> muestra mm:ss hasta esa hora.

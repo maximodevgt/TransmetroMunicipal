@@ -1,11 +1,11 @@
 -- =====================================================================
--- Sistema Web de Control y Administracion de Transmetro
+-- Sistema Web de Control y Administración de Transmetro
 -- Script completo de base de datos - MySQL 8.0.16+
 -- Autor: Maximiliano Ajca Us
 --
 -- Contenido:
 --   PARTE 1. Base de datos y tablas (19)
---   PARTE 2. Vista de resumen por linea
+--   PARTE 2. Vista de resumen por línea
 --   PARTE 3. Triggers de reglas de negocio (4)
 --   PARTE 4. Datos iniciales
 -- =====================================================================
@@ -111,7 +111,7 @@ CREATE TABLE estaciones (
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
--- Tabla 7. Linea - Estacion (orden del recorrido y distancias)
+-- Tabla 7. Línea - Estación (orden del recorrido y distancias)
 -- ---------------------------------------------------------------------
 CREATE TABLE linea_estacion (
   id                    BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -374,8 +374,8 @@ CREATE TABLE bitacora (
 ) ENGINE=InnoDB;
 
 -- =====================================================================
--- PARTE 2. VISTA DE RESUMEN POR LINEA
--- Estaciones, distancia total, buses asignados, minimo y maximo
+-- PARTE 2. VISTA DE RESUMEN POR LÍNEA
+-- Estaciones, distancia total, buses asignados, mínimo y máximo
 -- =====================================================================
 CREATE OR REPLACE VIEW vw_resumen_lineas AS
 SELECT
@@ -472,10 +472,10 @@ DELIMITER ;
 
 -- =====================================================================
 -- PARTE 4. DATOS INICIALES
--- Lineas, estaciones y tarifa (Q1.00): datos publicos del Transmetro.
+-- Líneas, estaciones y tarifa (Q1.00): datos públicos del Transmetro.
 -- Distancias entre estaciones: aproximadas.
 -- Personas, placas, parqueos y tarjetas: datos de ejemplo.
--- Usuarios: contrasena inicial 'Transmetro2026' (hash bcrypt).
+-- Usuarios: contraseña inicial 'Transmetro2026' (hash bcrypt).
 -- =====================================================================
 -- ---------------------------------------------------------------------
 -- Datos 1. Municipalidades
@@ -486,15 +486,15 @@ INSERT INTO municipalidades (id, nombre, departamento, created_at, updated_at) V
   (3, 'Mixco', 'Guatemala', NOW(), NOW());
 
 -- ---------------------------------------------------------------------
--- Datos 2. Lineas
+-- Datos 2. Líneas
 -- ---------------------------------------------------------------------
 INSERT INTO lineas (id, municipalidad_id, codigo, nombre, estado, created_at, updated_at) VALUES
-  (1, 1, 'L12', 'Linea 12 - Eje Sur', 'activa', NOW(), NOW()),
-  (2, 1, 'L1',  'Linea 1 - Centro Historico', 'activa', NOW(), NOW()),
-  (3, 1, 'L2',  'Linea 2 - Hipodromo', 'activa', NOW(), NOW());
+  (1, 1, 'L12', 'Línea 12 - Eje Sur', 'activa', NOW(), NOW()),
+  (2, 1, 'L1',  'Línea 1 - Centro Histórico', 'activa', NOW(), NOW()),
+  (3, 1, 'L2',  'Línea 2 - Hipódromo', 'activa', NOW(), NOW());
 
 -- ---------------------------------------------------------------------
--- Datos 3. Estaciones (San Sebastian pertenece a L1 y L2)
+-- Datos 3. Estaciones (San Sebastián pertenece a L1 y L2)
 -- ---------------------------------------------------------------------
 INSERT INTO estaciones (id, municipalidad_id, nombre, direccion, estado, created_at, updated_at) VALUES
   (1, 2, 'Centra Sur', 'Zona 12, Villa Nueva', 'activa', NOW(), NOW()),
@@ -564,7 +564,7 @@ UPDATE estaciones SET latitud = 14.663000, longitud = -90.507000 WHERE nombre = 
 UPDATE estaciones SET latitud = 14.667000, longitud = -90.511000 WHERE nombre = 'Jocotenango';
 
 -- ---------------------------------------------------------------------
--- Datos 4. Orden de estaciones por linea y distancia desde la estacion anterior (km, aproximada)
+-- Datos 4. Orden de estaciones por línea y distancia desde la estación anterior (km, aproximada)
 -- ---------------------------------------------------------------------
 INSERT INTO linea_estacion (linea_id, estacion_id, orden, distancia_anterior_km, created_at, updated_at) VALUES
   (1, 1, 1, 0.00, NOW(), NOW()),
@@ -598,7 +598,7 @@ INSERT INTO linea_estacion (linea_id, estacion_id, orden, distancia_anterior_km,
   (3, 28, 5, 0.50, NOW(), NOW());
 
 -- ---------------------------------------------------------------------
--- Datos 5. Accesos (2 por estacion en L12, 1 en las demas)
+-- Datos 5. Accesos (2 por estación en L12, 1 en las demás)
 -- ---------------------------------------------------------------------
 INSERT INTO accesos (id, estacion_id, nombre, created_at, updated_at) VALUES
   (1, 1, 'Acceso Norte', NOW(), NOW()),
@@ -692,7 +692,7 @@ INSERT INTO guardias (acceso_id, nombre, dpi, telefono, turno, created_at, updat
   (42, 'Nery Estrada Cabrera', '2000332610101', '55175434', 'matutino', NOW(), NOW());
 
 -- ---------------------------------------------------------------------
--- Datos 7. Usuarios: 1 administrador y 1 operador por estacion (RN-17)
+-- Datos 7. Usuarios: 1 administrador y 1 operador por estación (RN-17)
 -- ---------------------------------------------------------------------
 INSERT INTO users (id, estacion_id, name, email, password, rol, activo, created_at, updated_at) VALUES
   (1, NULL, 'Administrador Municipal', 'admin@transmetro.gt', '$2y$12$67d9LEWnOnWRiG3WybSXL.LTxIlda590Byg32oAX/41YUNg9Qs7xW', 'administrador', 1, NOW(), NOW()),
@@ -730,11 +730,11 @@ INSERT INTO users (id, estacion_id, name, email, password, rol, activo, created_
 -- ---------------------------------------------------------------------
 INSERT INTO parqueos (id, nombre, direccion, capacidad, created_at, updated_at) VALUES
   (1, 'Predio Centra Sur', 'Zona 12, Villa Nueva', 20, NOW(), NOW()),
-  (2, 'Predio Centro Historico', 'Zona 1, Ciudad de Guatemala', 15, NOW(), NOW()),
-  (3, 'Predio Hipodromo', 'Zona 2, Ciudad de Guatemala', 10, NOW(), NOW());
+  (2, 'Predio Centro Histórico', 'Zona 1, Ciudad de Guatemala', 15, NOW(), NOW()),
+  (3, 'Predio Hipódromo', 'Zona 2, Ciudad de Guatemala', 10, NOW(), NOW());
 
 -- ---------------------------------------------------------------------
--- Datos 9. Buses: L12 = 16 (min 14, max 28), L1 = 10 (min 10, max 20), L2 = 5 (min 5, max 10), 4 sin linea
+-- Datos 9. Buses: L12 = 16 (min 14, max 28), L1 = 10 (min 10, max 20), L2 = 5 (min 5, max 10), 4 sin línea
 -- ---------------------------------------------------------------------
 INSERT INTO buses (id, linea_id, parqueo_id, placa, codigo, capacidad_maxima, estado, created_at, updated_at) VALUES
   (1, 1, 1, 'TM-101', 'BUS-101', 100, 'disponible', NOW(), NOW()),
@@ -792,27 +792,27 @@ INSERT INTO pilotos (id, nombre, dpi, licencia, residencia, telefono, email, est
 
 INSERT INTO historial_educativo (piloto_id, nivel, institucion, titulo, anio, created_at, updated_at) VALUES
   (1, 'primaria', 'Escuela Oficial Urbana Mixta', 'Sexto Primaria', 1996, NOW(), NOW()),
-  (1, 'diversificado', 'Instituto Tecnico Vocacional Dr. Imrich Fischmann', 'Perito en Mecanica Automotriz', 2002, NOW(), NOW()),
+  (1, 'diversificado', 'Instituto Técnico Vocacional Dr. Imrich Fischmann', 'Perito en Mecánica Automotriz', 2002, NOW(), NOW()),
   (2, 'primaria', 'Escuela Oficial Urbana Mixta', 'Sexto Primaria', 1997, NOW(), NOW()),
-  (2, 'basico', 'Instituto Nacional de Educacion Basica', 'Tercero Basico', 2003, NOW(), NOW()),
+  (2, 'basico', 'Instituto Nacional de Educación Básica', 'Tercero Básico', 2003, NOW(), NOW()),
   (3, 'primaria', 'Escuela Oficial Urbana Mixta', 'Sexto Primaria', 1998, NOW(), NOW()),
-  (3, 'universitario', 'Universidad de San Carlos de Guatemala', 'Tecnico en Transporte', 2004, NOW(), NOW()),
+  (3, 'universitario', 'Universidad de San Carlos de Guatemala', 'Técnico en Transporte', 2004, NOW(), NOW()),
   (4, 'primaria', 'Escuela Oficial Urbana Mixta', 'Sexto Primaria', 1999, NOW(), NOW()),
   (4, 'diversificado', 'Instituto Nacional Central para Varones', 'Bachiller en Ciencias y Letras', 2005, NOW(), NOW()),
   (5, 'primaria', 'Escuela Oficial Urbana Mixta', 'Sexto Primaria', 2000, NOW(), NOW()),
-  (5, 'diversificado', 'Instituto Tecnico Vocacional Dr. Imrich Fischmann', 'Perito en Mecanica Automotriz', 2006, NOW(), NOW()),
+  (5, 'diversificado', 'Instituto Técnico Vocacional Dr. Imrich Fischmann', 'Perito en Mecánica Automotriz', 2006, NOW(), NOW()),
   (6, 'primaria', 'Escuela Oficial Urbana Mixta', 'Sexto Primaria', 2001, NOW(), NOW()),
-  (6, 'basico', 'Instituto Nacional de Educacion Basica', 'Tercero Basico', 2007, NOW(), NOW()),
+  (6, 'basico', 'Instituto Nacional de Educación Básica', 'Tercero Básico', 2007, NOW(), NOW()),
   (7, 'primaria', 'Escuela Oficial Urbana Mixta', 'Sexto Primaria', 2002, NOW(), NOW()),
-  (7, 'universitario', 'Universidad de San Carlos de Guatemala', 'Tecnico en Transporte', 2008, NOW(), NOW()),
+  (7, 'universitario', 'Universidad de San Carlos de Guatemala', 'Técnico en Transporte', 2008, NOW(), NOW()),
   (8, 'primaria', 'Escuela Oficial Urbana Mixta', 'Sexto Primaria', 1995, NOW(), NOW()),
   (8, 'diversificado', 'Instituto Nacional Central para Varones', 'Bachiller en Ciencias y Letras', 2001, NOW(), NOW()),
   (9, 'primaria', 'Escuela Oficial Urbana Mixta', 'Sexto Primaria', 1996, NOW(), NOW()),
-  (9, 'diversificado', 'Instituto Tecnico Vocacional Dr. Imrich Fischmann', 'Perito en Mecanica Automotriz', 2002, NOW(), NOW()),
+  (9, 'diversificado', 'Instituto Técnico Vocacional Dr. Imrich Fischmann', 'Perito en Mecánica Automotriz', 2002, NOW(), NOW()),
   (10, 'primaria', 'Escuela Oficial Urbana Mixta', 'Sexto Primaria', 1997, NOW(), NOW()),
-  (10, 'basico', 'Instituto Nacional de Educacion Basica', 'Tercero Basico', 2003, NOW(), NOW()),
+  (10, 'basico', 'Instituto Nacional de Educación Básica', 'Tercero Básico', 2003, NOW(), NOW()),
   (11, 'primaria', 'Escuela Oficial Urbana Mixta', 'Sexto Primaria', 1998, NOW(), NOW()),
-  (11, 'universitario', 'Universidad de San Carlos de Guatemala', 'Tecnico en Transporte', 2004, NOW(), NOW()),
+  (11, 'universitario', 'Universidad de San Carlos de Guatemala', 'Técnico en Transporte', 2004, NOW(), NOW()),
   (12, 'primaria', 'Escuela Oficial Urbana Mixta', 'Sexto Primaria', 1999, NOW(), NOW()),
   (12, 'diversificado', 'Instituto Nacional Central para Varones', 'Bachiller en Ciencias y Letras', 2005, NOW(), NOW());
 
@@ -847,7 +847,7 @@ INSERT INTO recorrido_estaciones (recorrido_id, estacion_id, hora_llegada, hora_
   (3, 16, '2026-10-02 07:14:00', NULL, 52, 0, NOW(), NOW());
 
 -- ---------------------------------------------------------------------
--- Datos 12. Pasajeros en espera por estacion
+-- Datos 12. Pasajeros en espera por estación
 -- ---------------------------------------------------------------------
 INSERT INTO registros_pasajeros (estacion_id, user_id, cantidad, registrado_en, created_at, updated_at) VALUES
   (1, 2, 60,  '2026-10-02 06:55:00', NOW(), NOW()),
@@ -859,7 +859,7 @@ INSERT INTO registros_pasajeros (estacion_id, user_id, cantidad, registrado_en, 
 -- Datos 13. Alertas (RN-15: 155 en espera >= 150 % de 100; RN-16: 20 de 100 < 25 %)
 -- ---------------------------------------------------------------------
 INSERT INTO alertas (estacion_id, bus_id, linea_id, tipo, mensaje, estado, atendida_en, created_at, updated_at) VALUES
-  (8, NULL, 1, 'alta_demanda', 'Estacion Trebol con 155 pasajeros en espera: enviar otro bus.', 'activa', NULL, NOW(), NOW()),
+  (8, NULL, 1, 'alta_demanda', 'Estación Trébol con 155 pasajeros en espera: enviar otro bus.', 'activa', NULL, NOW(), NOW()),
   (1, 2, 1, 'baja_ocupacion', 'BUS-102 con 20 de 100 pasajeros: esperar 5 minutos adicionales.', 'atendida', '2026-10-02 07:06:00', NOW(), NOW());
 
 -- ---------------------------------------------------------------------
@@ -908,15 +908,15 @@ INSERT INTO transacciones (tarjeta_id, acceso_id, user_id, tipo, monto, estado, 
   (5, 15, NULL, 'pago', 1.00, 'rechazada', 'Tarjeta bloqueada');
 
 -- ---------------------------------------------------------------------
--- Datos 16. Bitacora
+-- Datos 16. Bitácora
 -- ---------------------------------------------------------------------
 INSERT INTO bitacora (user_id, accion, tabla, registro_id, detalle) VALUES
-  (1, 'crear', 'lineas', 1, 'Registro de la Linea 12 - Eje Sur'),
-  (1, 'asignar_linea', 'buses', 1, 'BUS-101 asignado a la linea L12'),
+  (1, 'crear', 'lineas', 1, 'Registro de la Línea 12 - Eje Sur'),
+  (1, 'asignar_linea', 'buses', 1, 'BUS-101 asignado a la línea L12'),
   (1, 'bloquear', 'tarjetas', 5, 'Tarjeta TM-000005 bloqueada');
 
 -- ---------------------------------------------------------------------
--- Datos 17. Verificacion
+-- Datos 17. Verificación
 -- ---------------------------------------------------------------------
 SELECT * FROM vw_resumen_lineas;
 SELECT codigo, saldo, estado FROM tarjetas;

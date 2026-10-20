@@ -34,7 +34,9 @@ return [
 
     'lifetime' => (int) env('SESSION_LIFETIME', 120),
 
-    'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
+    // Equipos compartidos en las estaciones: la sesión termina también al cerrar el navegador
+    // (quien marcó "Recordarme" vuelve a entrar con su cookie).
+    'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', true),
 
     /*
     |--------------------------------------------------------------------------

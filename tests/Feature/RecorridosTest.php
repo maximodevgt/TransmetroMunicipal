@@ -205,7 +205,8 @@ class RecorridosTest extends TestCase
 
     public function test_el_detalle_muestra_la_linea_de_tiempo(): void
     {
-        $recorrido = $this->recorridoEnCurso(capacidad: 100);
+        // 8 estaciones: la línea de prueba pasa por Trébol, así el operador de Trébol puede ver el recorrido.
+        $recorrido = $this->recorridoEnCurso(capacidad: 100, estaciones: 8);
         $primera = $this->estacionDeOrden($recorrido->linea, 1);
         app(RecorridoService::class)->registrarLlegada($recorrido, $primera, 45);
 

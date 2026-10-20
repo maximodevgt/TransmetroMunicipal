@@ -14,7 +14,7 @@
                 <dd class="mt-1">
                     <x-estado :valor="$bus->estado" />
                     @if ($bus->recorridoEnCurso)
-                        <a href="{{ route('recorridos.show', $bus->recorridoEnCurso) }}" class="ml-1 text-xs font-medium text-celeste-700 hover:underline">Recorrido #{{ $bus->recorridoEnCurso->id }}</a>
+                        <x-enlace :url="$bus->recorridoEnCurso->puedeVerlo(auth()->user()) ? route('recorridos.show', $bus->recorridoEnCurso) : null" class="ml-1 text-xs font-medium text-celeste-700 hover:underline">Recorrido #{{ $bus->recorridoEnCurso->id }}</x-enlace>
                     @endif
                 </dd>
             </div>

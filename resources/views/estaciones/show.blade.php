@@ -27,7 +27,7 @@
                             {{ $linea->codigo }} · parada {{ $linea->pivot->orden }}
                         </a>
                     @empty
-                        <span class="text-sm text-slate-400">No pertenece a ninguna línea.</span>
+                        <span class="text-sm text-amber-600">No pertenece a ninguna línea (RN-02): agréguela desde una línea.</span>
                     @endforelse
                 </div>
             </div>
@@ -36,7 +36,11 @@
                 @forelse ($estacion->operadores as $operador)
                     <p class="font-medium">{{ $operador->name }} <span class="text-xs text-slate-400">{{ $operador->email }}</span></p>
                 @empty
-                    <p class="text-sm text-amber-600">Sin operador asignado.</p>
+                    <p class="text-sm text-amber-600">Sin operador asignado (RN-17).
+                        @if (auth()->user()->esAdministrador())
+                            <a href="{{ route('usuarios.create') }}" class="font-medium underline">Asignar uno</a>
+                        @endif
+                    </p>
                 @endforelse
             </div>
         </section>

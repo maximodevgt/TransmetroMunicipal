@@ -57,7 +57,7 @@ function popupBus(bus, ahora) {
             <div class="text-xs text-slate-400">Actualizado ${new Date(ahora * 1000).toLocaleTimeString('es-GT')}${bus.actualizado ? ` · última llegada ${escapar(bus.actualizado)}` : ''}</div>
         </dl>
         ${listaAlertas(bus.alertas)}
-        <a href="${escapar(bus.url)}" class="mt-2 inline-block text-xs font-semibold text-celeste-700 hover:underline">Ver recorrido #${bus.recorrido_id}</a>
+        ${bus.url ? `<a href="${escapar(bus.url)}" class="mt-2 inline-block text-xs font-semibold text-celeste-700 hover:underline">Ver recorrido #${bus.recorrido_id}</a>` : ''}
     </div>`;
 }
 
@@ -70,7 +70,7 @@ function popupEstacion(estacion) {
         <p class="text-xs text-slate-500">Líneas ${escapar(estacion.lineas.join(', '))}</p>
         <p class="mt-2 text-slate-700">${espera}</p>
         ${listaAlertas(estacion.alertas)}
-        <a href="${escapar(estacion.url)}" class="mt-2 inline-block text-xs font-semibold text-celeste-700 hover:underline">Ver estación</a>
+        ${estacion.url ? `<a href="${escapar(estacion.url)}" class="mt-2 inline-block text-xs font-semibold text-celeste-700 hover:underline">Ver estación</a>` : ''}
     </div>`;
 }
 

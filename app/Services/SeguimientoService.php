@@ -38,6 +38,8 @@ class SeguimientoService
 
         $recorridos = Recorrido::with(['bus', 'piloto', 'visitas'])->where('estado', 'en_curso')->orderBy('id')->get();
         $simulacion = $this->simulador->estado();
+        // El operador abre solo los recorridos de las líneas de su estación (el bus se ve igual en el mapa).
+        $lineasPropias = $usuario->esAdministrador() ? null : Recorrido::lineasDe($usuario)->pluck('linea_id');
 
         return [
             'ahora' => $ahora,
@@ -57,21 +59,29 @@ class SeguimientoService
                 'color' => $l->color(),
                 'trazo' => $l->estaciones->map(fn ($e) => $coordenadas->get($e->id))->filter()->values(),
             ])->values(),
-            'estaciones' => $this->estaciones($lineas, $coordenadas, $alertas, $resumenAlertas, $espera),
-            'buses' => $recorridos->map(fn (Recorrido $r) => $this->bus($r, $lineas->firstWhere('id', $r->linea_id), $coordenadas, $alertas, $resumenAlertas, $simulacion['tramos'][$r->id] ?? null, $ahora))
-                ->filter()->values(),
+            'estaciones' => $this->estaciones($lineas, $coordenadas, $alertas, $resumenAlertas, $espera, $usuario),
+            'buses' => $recorridos->map(function (Recorrido $r) use ($lineas, $coordenadas, $alertas, $resumenAlertas, $simulacion, $ahora, $lineasPropias) {
+                $bus = $this->bus($r, $lineas->firstWhere('id', $r->linea_id), $coordenadas, $alertas, $resumenAlertas, $simulacion['tramos'][$r->id] ?? null, $ahora);
+                if ($bus && $lineasPropias !== null && ! $lineasPropias->contains($r->linea_id)) {
+                    $bus['url'] = null;
+                }
+
+                return $bus;
+            })->filter()->values(),
             'alertas' => $resumenAlertas->values()->take(10),
         ];
     }
 
-    private function estaciones(Collection $lineas, Collection $coordenadas, Collection $alertas, Collection $resumenAlertas, Collection $espera): Collection
+    private function estaciones(Collection $lineas, Collection $coordenadas, Collection $alertas, Collection $resumenAlertas, Collection $espera, User $usuario): Collection
     {
         return $lineas->flatMap(fn (Linea $l) => $l->estaciones->map(fn ($e) => [$e, $l]))
             ->groupBy(fn ($par) => $par[0]->id)
             ->filter(fn ($pares, $id) => $coordenadas->has($id))
-            ->map(function ($pares, $id) use ($coordenadas, $alertas, $resumenAlertas, $espera) {
+            ->map(function ($pares, $id) use ($coordenadas, $alertas, $resumenAlertas, $espera, $usuario) {
                 $estacion = $pares[0][0];
-                $registro = $espera->get($id);
+                // El operador ve la ficha y los pasajeros en espera solo de su estación.
+                $propia = $estacion->puedeVerla($usuario);
+                $registro = $propia ? $espera->get($id) : null;
 
                 return [
                     'id' => $id,
@@ -81,7 +91,7 @@ class SeguimientoService
                     'color' => $pares[0][1]->color(),
                     'en_espera' => $registro ? ['cantidad' => $registro->cantidad, 'hora' => $registro->registrado_en->format('H:i')] : null,
                     'alertas' => $alertas->where('estacion_id', $id)->map(fn ($a) => $resumenAlertas[$a->id])->values(),
-                    'url' => route('estaciones.show', $id),
+                    'url' => $propia ? route('estaciones.show', $id) : null,
                 ];
             })->values();
     }

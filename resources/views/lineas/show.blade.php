@@ -51,13 +51,26 @@
                             </span>
                             <div class="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-2">
                                 <div class="min-w-0">
-                                    <a href="{{ route('estaciones.show', $estacion) }}" class="font-medium text-slate-800 hover:text-celeste-600">{{ $estacion->nombre }}</a>
+                                    <x-enlace :url="$estacion->puedeVerla(auth()->user()) ? route('estaciones.show', $estacion) : null" class="font-medium text-slate-800 hover:text-celeste-600">{{ $estacion->nombre }}</x-enlace>
                                     <p class="text-xs text-slate-500">
                                         {{ $loop->first ? 'Inicio del recorrido' : '+'.number_format($estacion->pivot->distancia_anterior_km, 2).' km desde la anterior' }}
                                     </p>
                                 </div>
                                 @if ($esAdmin)
                                     <div class="flex items-center gap-2">
+                                        {{-- RF-03: subir o bajar la estación en el recorrido --}}
+                                        <div class="flex items-center">
+                                            @foreach ([['subir', $estacion->pivot->orden - 1, ! $loop->first, 'Subir'], ['bajar', $estacion->pivot->orden + 1, ! $loop->last, 'Bajar']] as [$icono, $posicion, $puede, $texto])
+                                                <form method="POST" action="{{ route('lineas.estaciones.mover', [$linea, $estacion]) }}">
+                                                    @csrf @method('PATCH')
+                                                    <input type="hidden" name="posicion" value="{{ $posicion }}">
+                                                    <button @disabled(! $puede) class="rounded-lg p-1.5 text-celeste-600 hover:bg-celeste-50 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent"
+                                                            title="{{ $texto }} en el recorrido" aria-label="{{ $texto }} {{ $estacion->nombre }} en el recorrido">
+                                                        <x-icono :nombre="$icono" class="size-4" />
+                                                    </button>
+                                                </form>
+                                            @endforeach
+                                        </div>
                                         @unless ($loop->first)
                                             <form method="POST" action="{{ route('lineas.estaciones.update', [$linea, $estacion]) }}" class="flex items-center gap-1">
                                                 @csrf @method('PUT')
@@ -115,23 +128,24 @@
         </section>
     </div>
 
-    {{-- RF-04: accesos de todas las estaciones de la línea y sus guardias --}}
+    {{-- RF-04: accesos de las estaciones de la línea y sus guardias (el operador, solo los de su estación) --}}
+    @php($conAccesos = $esAdmin ? $linea->estaciones : $linea->estaciones->where('id', auth()->user()->estacion_id))
     <section class="tarjeta mt-6 overflow-hidden">
         <div class="px-5 py-4">
-            <h2 class="font-semibold text-celeste-900">Accesos y guardias de la línea</h2>
-            <p class="text-xs text-slate-500">{{ $linea->estaciones->sum(fn ($e) => $e->accesos->count()) }} accesos en {{ $linea->estaciones->count() }} estaciones</p>
+            <h2 class="font-semibold text-celeste-900">{{ $esAdmin ? 'Accesos y guardias de la línea' : 'Accesos y guardias de su estación' }}</h2>
+            <p class="text-xs text-slate-500">{{ $conAccesos->sum(fn ($e) => $e->accesos->count()) }} accesos en {{ $conAccesos->count() }} {{ $conAccesos->count() === 1 ? 'estación' : 'estaciones' }}</p>
         </div>
         <div class="overflow-x-auto">
             <table class="tabla">
                 <thead><tr><th>#</th><th>Estación</th><th>Acceso</th><th>Guardias</th></tr></thead>
                 <tbody>
-                    @forelse ($linea->estaciones as $estacion)
+                    @forelse ($conAccesos as $estacion)
                         @forelse ($estacion->accesos as $acceso)
                             <tr>
                                 @if ($loop->first)
                                     <td rowspan="{{ $estacion->accesos->count() }}" class="align-top text-slate-400">{{ $estacion->pivot->orden }}</td>
                                     <td rowspan="{{ $estacion->accesos->count() }}" class="align-top">
-                                        <a href="{{ route('estaciones.show', $estacion) }}" class="font-medium text-celeste-700 hover:underline">{{ $estacion->nombre }}</a>
+                                        <x-enlace :url="$estacion->puedeVerla(auth()->user()) ? route('estaciones.show', $estacion) : null" class="font-medium text-celeste-700 hover:underline">{{ $estacion->nombre }}</x-enlace>
                                     </td>
                                 @endif
                                 <td class="font-medium">{{ $acceso->nombre }}</td>
@@ -146,12 +160,12 @@
                         @empty
                             <tr>
                                 <td class="text-slate-400">{{ $estacion->pivot->orden }}</td>
-                                <td><a href="{{ route('estaciones.show', $estacion) }}" class="font-medium text-celeste-700 hover:underline">{{ $estacion->nombre }}</a></td>
+                                <td><x-enlace :url="$estacion->puedeVerla(auth()->user()) ? route('estaciones.show', $estacion) : null" class="font-medium text-celeste-700 hover:underline">{{ $estacion->nombre }}</x-enlace></td>
                                 <td colspan="2" class="text-amber-600">La estación no tiene accesos.</td>
                             </tr>
                         @endforelse
                     @empty
-                        <tr><td colspan="4" class="text-slate-500">La línea aún no tiene estaciones.</td></tr>
+                        <tr><td colspan="4" class="text-slate-500">{{ $esAdmin ? 'La línea aún no tiene estaciones.' : 'Su estación no está en esta línea.' }}</td></tr>
                     @endforelse
                 </tbody>
             </table>

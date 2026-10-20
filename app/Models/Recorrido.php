@@ -4,9 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Facades\DB;
 
 #[Table('recorridos')]
@@ -41,6 +43,26 @@ class Recorrido extends Model
     public function visitas(): HasMany
     {
         return $this->hasMany(RecorridoEstacion::class, 'recorrido_id')->orderBy('hora_llegada')->orderBy('id');
+    }
+
+    /**
+     * Recorridos que puede ver el usuario: el administrador todos; el operador los de las líneas
+     * que pasan por su estación (sin estación, ninguno).
+     */
+    public function scopeVisiblesPara(Builder $query, User $usuario): void
+    {
+        $query->when(! $usuario->esAdministrador(), fn ($q) => $q->whereIn('linea_id', self::lineasDe($usuario)));
+    }
+
+    public function puedeVerlo(User $usuario): bool
+    {
+        return $usuario->esAdministrador() || self::lineasDe($usuario)->where('linea_id', $this->linea_id)->exists();
+    }
+
+    /** Líneas que pasan por la estación del usuario. */
+    public static function lineasDe(User $usuario): QueryBuilder
+    {
+        return DB::table('linea_estacion')->where('estacion_id', (int) $usuario->estacion_id)->select('linea_id');
     }
 
     public function enCurso(): bool

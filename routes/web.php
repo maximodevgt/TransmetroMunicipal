@@ -98,6 +98,7 @@ Route::middleware(['auth', 'activo'])->group(function () {
         Route::post('lineas/{linea}/estaciones', [LineaEstacionController::class, 'store'])->name('lineas.estaciones.store');
         Route::put('lineas/{linea}/estaciones/{estacion}', [LineaEstacionController::class, 'update'])->name('lineas.estaciones.update');
         Route::delete('lineas/{linea}/estaciones/{estacion}', [LineaEstacionController::class, 'destroy'])->name('lineas.estaciones.destroy');
+        Route::patch('lineas/{linea}/estaciones/{estacion}/mover', [LineaEstacionController::class, 'mover'])->name('lineas.estaciones.mover');
 
         // Accesos dentro de su estación y guardias dentro de su acceso (rutas anidadas solo para crear).
         Route::resource('estaciones.accesos', AccesoController::class)->shallow()->except(['index', 'show'])
