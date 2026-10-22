@@ -10,7 +10,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Estaciones: líneas y orden, accesos, guardias, operador, pasajeros en espera (último registro) y alertas activas.
+ * Estaciones: municipalidad, líneas y orden, accesos, guardias, operador, pasajeros en espera (último registro) y alertas activas.
  * Todo en una consulta con subconsultas por estación.
  */
 class EstacionesReporte extends Reporte
@@ -27,7 +27,7 @@ class EstacionesReporte extends Reporte
 
     public function descripcion(): string
     {
-        return 'Líneas, accesos, guardias, operador, pasajeros en espera y alertas activas.';
+        return 'Municipalidad, líneas, accesos, guardias, operador, pasajeros en espera y alertas activas.';
     }
 
     public function icono(): string
@@ -52,6 +52,7 @@ class EstacionesReporte extends Reporte
     {
         return [
             'nombre' => ['Estación', 'texto'],
+            'municipalidad' => ['Municipalidad', 'texto'],
             'lineas' => ['Líneas', 'texto'],
             'orden' => ['Orden', 'texto'],
             'accesos' => ['Accesos', 'numero'],
@@ -68,7 +69,8 @@ class EstacionesReporte extends Reporte
             ->whereColumn('le.estacion_id', 'e.id')->selectRaw("GROUP_CONCAT({$expresion} ORDER BY l.id SEPARATOR ', ')");
 
         return DB::table('estaciones as e')
-            ->select('e.id', 'e.nombre')
+            ->join('municipalidades as m', 'm.id', '=', 'e.municipalidad_id')
+            ->select('e.id', 'e.nombre', 'm.nombre as municipalidad')
             ->selectSub($porLinea('l.codigo'), 'lineas')
             ->selectSub($porLinea('le.orden'), 'orden')
             ->selectSub(DB::table('accesos as a')->whereColumn('a.estacion_id', 'e.id')->selectRaw('COUNT(*)'), 'accesos')

@@ -45,20 +45,32 @@ class PagoService
 
     public function bloquear(Tarjeta $tarjeta, string $motivo): void
     {
-        if ($tarjeta->estado === 'bloqueada') {
-            throw new ReglaNegocioException("La tarjeta {$tarjeta->codigo} ya está bloqueada.");
-        }
-        $tarjeta->update(['estado' => 'bloqueada']);
-        Bitacora::registrar('bloquear', $tarjeta, "Tarjeta {$tarjeta->codigo} bloqueada: {$motivo}");
+        $this->cambiarEstado($tarjeta, 'bloqueada', $motivo);
     }
 
     public function desbloquear(Tarjeta $tarjeta, string $motivo): void
     {
-        if ($tarjeta->activa()) {
-            throw new ReglaNegocioException("La tarjeta {$tarjeta->codigo} ya está activa.");
+        $this->cambiarEstado($tarjeta, 'activa', $motivo);
+    }
+
+    /**
+     * Cambia el estado de la tarjeta (activa, bloqueada, suspendida o vencida) con el motivo en la bitácora.
+     * Solo con la tarjeta activa se pagan pasajes y se reciben recargas (lo verifica el trigger).
+     */
+    public function cambiarEstado(Tarjeta $tarjeta, string $estado, string $motivo): void
+    {
+        if ($tarjeta->estado === $estado) {
+            throw new ReglaNegocioException("La tarjeta {$tarjeta->codigo} ya está ".Tarjeta::ESTADOS[$estado].'.');
         }
-        $tarjeta->update(['estado' => 'activa']);
-        Bitacora::registrar('desbloquear', $tarjeta, "Tarjeta {$tarjeta->codigo} desbloqueada: {$motivo}");
+        $accion = match ($estado) {
+            'activa' => 'desbloquear',
+            'bloqueada' => 'bloquear',
+            'suspendida' => 'suspender',
+            default => 'cambiar_estado',
+        };
+        $texto = $estado === 'activa' ? 'activada' : mb_strtolower(Tarjeta::ESTADOS[$estado]);
+        $tarjeta->update(['estado' => $estado]);
+        Bitacora::registrar($accion, $tarjeta, "Tarjeta {$tarjeta->codigo} {$texto}: {$motivo}");
     }
 
     /**

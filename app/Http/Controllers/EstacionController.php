@@ -56,17 +56,21 @@ class EstacionController extends Controller implements HasMiddleware
         $datos = $this->validar($request);
         $enLinea = $request->validate([
             'linea_id' => ['required', 'exists:lineas,id'],
+            'orden' => ['nullable', 'integer', 'min:1'],
             'distancia_anterior_km' => ['required', 'numeric', 'min:0', 'max:9999.99'],
         ], [
             'linea_id.required' => 'Elija la línea a la que pertenece la estación (cada estación debe estar al menos en una).',
-        ], ['linea_id' => 'línea', 'distancia_anterior_km' => 'distancia desde la estación anterior']);
+        ], ['linea_id' => 'línea', 'orden' => 'posición', 'distancia_anterior_km' => 'distancia desde la estación anterior']);
         $linea = Linea::findOrFail($enLinea['linea_id']);
+        // Sin posición, o con una mayor al total, entra al final del recorrido.
+        $total = $linea->estaciones()->count();
+        $orden = isset($enLinea['orden']) ? min((int) $enLinea['orden'], $total + 1) : null;
 
         try {
-            [$estacion, $orden] = DB::transaction(function () use ($datos, $linea, $enLinea, $asignacion) {
+            [$estacion, $orden] = DB::transaction(function () use ($datos, $linea, $enLinea, $orden, $asignacion) {
                 $estacion = Estacion::create($datos);
 
-                return [$estacion, $asignacion->agregarEstacion($linea, $estacion, (float) $enLinea['distancia_anterior_km'])];
+                return [$estacion, $asignacion->agregarEstacion($linea, $estacion, (float) $enLinea['distancia_anterior_km'], $orden)];
             });
         } catch (QueryException $e) {
             return $this->volverConErrorBd($e);

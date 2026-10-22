@@ -62,10 +62,12 @@ Route::middleware(['auth', 'activo'])->group(function () {
     Route::post('seguimiento/avanzar', [SeguimientoController::class, 'avanzar'])->middleware('throttle:120,1,seguimiento-avanzar')->name('seguimiento.avanzar');
     Route::post('seguimiento/simulacion', [SeguimientoController::class, 'simulacion'])->middleware('rol:administrador')->name('seguimiento.simulacion');
 
-    // Tarjeta Transmetro (ambos roles). Pagos SIMULADOS; el saldo lo calculan los triggers.
+    // Tarjeta Transmetro: ambos roles consultan y recargan; emitir y cambiar el estado es del administrador
+    // (ver middleware() del controlador). Pagos SIMULADOS; el saldo lo calculan los triggers.
     Route::resource('tarjetas', TarjetaController::class)->only(['index', 'create', 'store', 'show'])->parameters(['tarjetas' => 'tarjeta']);
     Route::patch('tarjetas/{tarjeta}/bloquear', [TarjetaController::class, 'bloquear'])->name('tarjetas.bloquear');
     Route::patch('tarjetas/{tarjeta}/desbloquear', [TarjetaController::class, 'desbloquear'])->name('tarjetas.desbloquear');
+    Route::patch('tarjetas/{tarjeta}/estado', [TarjetaController::class, 'estado'])->name('tarjetas.estado');
     Route::get('tarjetas/{tarjeta}/recargar', [RecargaController::class, 'create'])->name('recargas.create');
     Route::post('tarjetas/{tarjeta}/recargas/efectivo', [RecargaController::class, 'efectivo'])->middleware('rol:operador')->name('recargas.efectivo');
     Route::post('tarjetas/{tarjeta}/recargas/en-linea', [RecargaController::class, 'enLinea'])->middleware('throttle:20,1,recargas')->name('recargas.en-linea');

@@ -229,7 +229,7 @@ class SeguridadTest extends TestCase
         $operador->update(['activo' => false]);
 
         $this->iniciarSesion($operador->email)
-            ->assertSessionHasErrors(['email' => 'Las credenciales no son válidas o el usuario está desactivado.']);
+            ->assertSessionHasErrors(['email' => 'Su usuario está desactivado. Comuníquese con el administrador.']);
         $this->assertGuest();
 
         $this->actingAs($operador)->get(route('dashboard'))->assertRedirect(route('login'));

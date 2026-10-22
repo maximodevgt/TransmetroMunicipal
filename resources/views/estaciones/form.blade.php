@@ -22,12 +22,14 @@
         </div>
 
         @unless ($estacion->exists)
-            {{-- RN-02: toda estación pertenece al menos a una línea; entra al final de su recorrido. --}}
+            {{-- RN-02: toda estación pertenece al menos a una línea; entra en la posición elegida (o al final). --}}
             <fieldset class="rounded-xl bg-celeste-50 p-4">
                 <legend class="px-1 text-sm font-semibold text-celeste-800">Línea</legend>
-                <div class="grid gap-5 sm:grid-cols-2">
+                <div class="grid gap-5 sm:grid-cols-3">
                     <x-campo nombre="linea_id" etiqueta="Línea a la que pertenece" tipo="select" :opciones="$lineas->mapWithKeys(fn ($l) => [$l->id => $l->codigo.' · '.$l->nombre])"
-                             vacio="Seleccione…" required ayuda="Se agrega al final del recorrido; el orden se cambia desde la línea." />
+                             vacio="Seleccione…" required />
+                    <x-campo nombre="orden" etiqueta="Posición en el recorrido" tipo="number" min="1" placeholder="Al final"
+                             ayuda="Vacío: al final. Las siguientes se corren una posición." />
                     <x-campo nombre="distancia_anterior_km" etiqueta="Distancia desde la estación anterior (km)" tipo="number" step="0.01" min="0" max="9999.99"
                              :valor="old('distancia_anterior_km', '0.50')" required />
                 </div>

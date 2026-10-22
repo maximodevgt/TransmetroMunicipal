@@ -7,15 +7,23 @@ use App\Models\Tarjeta;
 use App\Services\PagoService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
- * Tarjetas Transmetro (administrador y operador).
+ * Tarjetas Transmetro. Ambos roles consultan (el operador, para recargar en su ventanilla);
+ * emitir y cambiar el estado es del administrador (CU-15 Gestionar Tarjetas Transmetro).
  */
-class TarjetaController extends Controller
+class TarjetaController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [new Middleware('rol:administrador', except: ['index', 'show'])];
+    }
+
     public function index(Request $request): View
     {
         $filtros = $request->only('buscar', 'estado');
@@ -72,6 +80,17 @@ class TarjetaController extends Controller
             'tarjeta' => $tarjeta->load('pasajero'),
             'transacciones' => $tarjeta->transacciones()->with(['acceso.estacion', 'estacion', 'user'])->orderByDesc('id')->paginate(10),
         ]);
+    }
+
+    /**
+     * Cambiar el estado (activa, bloqueada, suspendida o vencida) con motivo.
+     */
+    public function estado(Request $request, Tarjeta $tarjeta, PagoService $pagos): RedirectResponse
+    {
+        $estado = $request->validate(['estado' => ['required', Rule::in(array_keys(Tarjeta::ESTADOS))]], [], ['estado' => 'estado'])['estado'];
+        $pagos->cambiarEstado($tarjeta, $estado, $this->motivo($request));
+
+        return back()->with('ok', "Tarjeta {$tarjeta->codigo}: estado cambiado a ".mb_strtolower(Tarjeta::ESTADOS[$estado]).'.');
     }
 
     public function bloquear(Request $request, Tarjeta $tarjeta, PagoService $pagos): RedirectResponse

@@ -179,7 +179,7 @@ php artisan test
 vendor/bin/pint --test       # estilo del código
 ```
 
-Hay **pruebas Feature y Unit** de cada módulo: reglas de negocio, permisos por rol y por estación, seguridad (CSRF, XSS, inyección SQL, límite de intentos, sesión y "Recordarme"), reportes (totales, CSV, impresión, cantidad de consultas), gráficas, páginas de error y los scripts SQL 06 y 07 (que se ejecutan dentro de la transacción de la prueba con el modo de actualización segura). La matriz `docs/trazabilidad.md` relaciona cada requisito con su prueba.
+Hay **pruebas Feature y Unit** de cada módulo: reglas de negocio, permisos por rol y por estación, seguridad (CSRF, XSS, inyección SQL, límite de intentos, sesión y "Recordarme"), reportes (totales, CSV, impresión, cantidad de consultas), gráficas, páginas de error y los scripts SQL 06 y 07 (que se ejecutan dentro de la transacción de la prueba con el modo de actualización segura). La matriz `docs/trazabilidad.md` relaciona cada requisito con su prueba, y `PlanDePruebasTest` ejecuta los 50 casos del plan de pruebas (CP-01 a CP-50) con sus datos.
 
 ## Levantarlo para la demostración
 
@@ -213,7 +213,7 @@ app/
   Support/               utilidades (interpolación del mapa)
 config/transmetro.php    pasaje, montos de recarga y tarjetas de prueba de la pasarela
 database/sql/            scripts de la base (01 a 07)
-docs/                    trazabilidad y guion de la demostración
+docs/                    trazabilidad, resultados de pruebas y guion de la demostración
 lang/es/                 mensajes de validación y paginación en español
 resources/views/         vistas Blade (componentes en components/, páginas de error en errors/)
 resources/js/            mapa, gráficas, recargas, cobro de pasaje, notificaciones y alertas en vivo
@@ -225,6 +225,7 @@ tests/Unit/              pruebas unitarias
 ## Documentación
 
 - [`docs/trazabilidad.md`](docs/trazabilidad.md): matriz de trazabilidad de RF-01 a RF-16, RNF-01 a RNF-07 y RN-01 a RN-18.
+- [`docs/resultados_pruebas.md`](docs/resultados_pruebas.md): resultados de los casos CP-01 a CP-50 y de los criterios de aceptación CA-01 a CA-24, con el registro de defectos.
 - [`docs/guion_demo.md`](docs/guion_demo.md): guion de la presentación (10-15 minutos) con plan B.
 
 ---

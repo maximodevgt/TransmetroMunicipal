@@ -25,7 +25,7 @@ return [
     'required' => 'El campo :attribute es obligatorio.',
     'required_if' => 'El campo :attribute es obligatorio cuando :other es :value.',
     'string' => 'El campo :attribute debe ser texto.',
-    'unique' => 'El valor de :attribute ya está registrado.',
+    'unique' => 'Ya existe un registro con ese valor de :attribute.',
 
     'attributes' => [
         'anio' => 'año',

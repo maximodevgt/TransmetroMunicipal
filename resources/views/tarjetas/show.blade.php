@@ -24,22 +24,23 @@
                 <div><dt class="text-xs text-slate-500">Emitida</dt><dd>{{ $tarjeta->fecha_emision?->format('d/m/Y') }}</dd></div>
             </dl>
 
-            {{-- Bloquear o desbloquear siempre con motivo (queda en la bitácora) --}}
-            @php($bloquea = $tarjeta->activa())
-            <details class="rounded-xl bg-celeste-50 p-4" @if ($errors->has('motivo')) open @endif>
-                <summary class="cursor-pointer text-sm font-semibold {{ $bloquea ? 'text-rose-700' : 'text-emerald-700' }}">
-                    {{ $bloquea ? 'Bloquear tarjeta' : 'Desbloquear tarjeta' }}
-                </summary>
-                <form method="POST" action="{{ route($bloquea ? 'tarjetas.bloquear' : 'tarjetas.desbloquear', $tarjeta) }}" class="mt-3 space-y-3"
-                      @if ($bloquea) data-confirmar-titulo="¿Bloquear la tarjeta {{ $tarjeta->codigo }}?" data-confirmar="No podrá pagar pasajes ni recibir recargas hasta que se desbloquee." data-confirmar-boton="Sí, bloquear" @endif>
-                    @csrf @method('PATCH')
-                    <x-campo nombre="motivo" etiqueta="Motivo" maxlength="150" required minlength="5"
-                             :placeholder="$bloquea ? 'Reporte de robo o extravío' : 'El pasajero recuperó la tarjeta'" />
-                    <button @class(['btn w-full', 'bg-rose-600 text-white hover:bg-rose-700' => $bloquea, 'bg-emerald-600 text-white hover:bg-emerald-700' => ! $bloquea])>
-                        {{ $bloquea ? 'Bloquear' : 'Desbloquear' }}
-                    </button>
-                </form>
-            </details>
+            {{-- Cambiar el estado: solo el administrador, siempre con motivo (queda en la bitácora) --}}
+            @if (auth()->user()->esAdministrador())
+                <details class="rounded-xl bg-celeste-50 p-4" @if ($errors->hasAny(['estado', 'motivo'])) open @endif data-cambiar-estado>
+                    <summary class="cursor-pointer text-sm font-semibold text-celeste-800">Cambiar estado</summary>
+                    <form method="POST" action="{{ route('tarjetas.estado', $tarjeta) }}" class="mt-3 space-y-3"
+                          data-confirmar-titulo="¿Cambiar el estado de la tarjeta {{ $tarjeta->codigo }}?"
+                          data-confirmar="Solo con la tarjeta activa se pagan pasajes y se reciben recargas." data-confirmar-boton="Sí, cambiar">
+                        @csrf @method('PATCH')
+                        <x-campo nombre="estado" etiqueta="Nuevo estado" tipo="select" required vacio="Seleccione…"
+                                 :opciones="collect(\App\Models\Tarjeta::ESTADOS)->except($tarjeta->estado)->all()" />
+                        <x-campo nombre="motivo" etiqueta="Motivo" maxlength="150" required minlength="5" placeholder="Reporte de robo o extravío" />
+                        <button class="btn-primario w-full">Cambiar estado</button>
+                    </form>
+                </details>
+            @else
+                <p class="rounded-xl bg-celeste-50 p-3 text-xs text-slate-600">El estado de la tarjeta lo cambia el administrador.</p>
+            @endif
         </section>
 
         <section class="tarjeta overflow-hidden xl:col-span-2">

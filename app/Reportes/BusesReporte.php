@@ -11,7 +11,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Buses asignados a una línea, con su parqueo y el piloto de su último recorrido.
+ * Buses agrupados por línea (y al final los que no tienen línea), con su parqueo y el piloto de su último recorrido.
  * El operador ve los buses de las líneas que pasan por su estación.
  */
 class BusesReporte extends Reporte
@@ -28,7 +28,7 @@ class BusesReporte extends Reporte
 
     public function descripcion(): string
     {
-        return 'Buses por línea con parqueo, capacidad, estado y piloto del último recorrido.';
+        return 'Buses por línea y sin línea, con parqueo, capacidad, estado y piloto del último recorrido.';
     }
 
     public function icono(): string
@@ -41,7 +41,8 @@ class BusesReporte extends Reporte
         return [
             'linea_id' => ['etiqueta' => 'Línea', 'vacio' => 'Todas', 'opciones' => Linea::query()
                 ->when(! $usuario->esAdministrador(), fn ($q) => $q->whereIn('id', $this->lineasDeLaEstacion($usuario)))
-                ->orderBy('id')->pluck('codigo', 'id')->all()],
+                ->orderBy('id')->pluck('codigo', 'id')->all()
+                + ($usuario->esAdministrador() ? ['sin_linea' => 'Sin línea'] : [])],
             'parqueo_id' => ['etiqueta' => 'Parqueo', 'vacio' => 'Todos', 'opciones' => Parqueo::orderBy('nombre')->pluck('nombre', 'id')->all()],
             'estado' => ['etiqueta' => 'Estado', 'vacio' => 'Todos', 'opciones' => collect(Bus::ESTADOS)->mapWithKeys(fn ($e) => [$e => ucfirst(str_replace('_', ' ', $e))])->all()],
         ];
@@ -62,16 +63,22 @@ class BusesReporte extends Reporte
 
     public function consulta(array $filtros, User $usuario): Builder
     {
+        $linea = $filtros['linea_id'] ?? null;
+
         return DB::table('buses as b')
-            ->join('lineas as l', 'l.id', '=', 'b.linea_id')
+            ->leftJoin('lineas as l', 'l.id', '=', 'b.linea_id')
             ->join('parqueos as p', 'p.id', '=', 'b.parqueo_id')
-            ->select('b.id', 'l.codigo as linea', 'b.codigo', 'b.placa', 'p.nombre as parqueo', 'b.capacidad_maxima', 'b.estado')
+            ->select('b.id', 'b.codigo', 'b.placa', 'p.nombre as parqueo', 'b.capacidad_maxima', 'b.estado')
+            ->selectRaw("COALESCE(l.codigo, 'Sin línea') AS linea")
             ->selectSub(DB::table('recorridos as r')->join('pilotos as pi', 'pi.id', '=', 'r.piloto_id')
                 ->whereColumn('r.bus_id', 'b.id')->orderByDesc('r.inicio')->orderByDesc('r.id')->limit(1)->select('pi.nombre'), 'piloto')
             ->when(! $usuario->esAdministrador(), fn ($q) => $q->whereIn('b.linea_id', $this->lineasDeLaEstacion($usuario)))
-            ->when(isset($filtros['linea_id']), fn ($q) => $q->where('b.linea_id', $filtros['linea_id']))
+            ->when($linea === 'sin_linea', fn ($q) => $q->whereNull('b.linea_id'))
+            ->when($linea !== null && $linea !== 'sin_linea', fn ($q) => $q->where('b.linea_id', $linea))
             ->when(isset($filtros['parqueo_id']), fn ($q) => $q->where('b.parqueo_id', $filtros['parqueo_id']))
             ->when(isset($filtros['estado']), fn ($q) => $q->where('b.estado', $filtros['estado']))
+            // Agrupados por línea; los que no tienen línea, al final.
+            ->orderByRaw('b.linea_id IS NULL')
             ->orderBy('l.id')
             ->orderBy('b.codigo');
     }
