@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Cierra la sesion si el usuario fue desactivado mientras estaba conectado.
+ * Cierra la sesión si el usuario fue desactivado mientras estaba conectado.
  */
 class VerificarUsuarioActivo
 {

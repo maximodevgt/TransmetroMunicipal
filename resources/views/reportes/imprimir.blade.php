@@ -3,7 +3,7 @@
     $usuario = auth()->user();
     // Texto seguro para los márgenes de la página (content: "..." en CSS).
     $css = fn (string $texto) => '"'.str_replace(['\\', '"', '<', '>', "\n"], ['\\\\', '\\"', '', '', ' '], $texto).'"';
-    $pie = 'Generado el '.$generado->format('d/m/Y H:i').' por '.$usuario->name;
+    $pie = 'Emitido el '.$emitido->format('d/m/Y H:i').' por '.$usuario->name;
 @endphp
 <!DOCTYPE html>
 <html lang="es">
@@ -90,7 +90,7 @@
                 <p class="mt-1 text-sm text-slate-600"><span class="font-medium">Filtros:</span> {{ $descripcionFiltros }}</p>
             </div>
             <div class="shrink-0 text-right text-xs text-slate-500">
-                <p>Generado el {{ $generado->format('d/m/Y H:i') }}</p>
+                <p>Emitido el {{ $emitido->format('d/m/Y H:i') }}</p>
                 <p>por {{ $usuario->name }}</p>
                 <p>{{ ucfirst($usuario->rol) }}{{ $usuario->estacion ? ' · '.$usuario->estacion->nombre : '' }}</p>
             </div>

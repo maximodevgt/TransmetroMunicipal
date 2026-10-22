@@ -12,7 +12,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 /**
- * Usuario del sistema (tabla propia "users": administrador u operador de estacion).
+ * Usuario del sistema: administrador municipal u operador de estación.
  */
 #[Table('users')]
 #[Fillable(['estacion_id', 'name', 'email', 'password', 'rol', 'activo'])]
@@ -26,11 +26,7 @@ class User extends Authenticatable
 
     public const ROL_OPERADOR = 'operador';
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
+    /** @return array<string, string> */
     protected function casts(): array
     {
         return [

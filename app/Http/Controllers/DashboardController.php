@@ -54,7 +54,7 @@ class DashboardController extends Controller
      */
     public function graficas(Request $request, GraficasService $graficas): JsonResponse
     {
-        return response()->json(['graficas' => $graficas->para($request->user()), 'generado' => now()->format('H:i')]);
+        return response()->json(['graficas' => $graficas->para($request->user()), 'actualizado' => now()->format('H:i')]);
     }
 
     /**

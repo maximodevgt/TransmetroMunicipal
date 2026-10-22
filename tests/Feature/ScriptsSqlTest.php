@@ -8,9 +8,8 @@ use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 /**
- * Los scripts de datos (06 y 07) se ejecutan dentro de la transacción de la prueba, que se revierte
- * al terminar: así se comprueba que corren sin errores sobre la base real, que respetan los triggers
- * y que son idempotentes, sin dejar nada guardado. Solo usan DML y una tabla temporal (no confirman).
+ * Los scripts 06 y 07 se ejecutan dentro de la transacción de la prueba: corren sin errores sobre la base real,
+ * respetan los triggers y son idempotentes, sin dejar nada guardado.
  */
 class ScriptsSqlTest extends TestCase
 {

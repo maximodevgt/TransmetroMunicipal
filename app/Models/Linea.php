@@ -29,7 +29,7 @@ class Linea extends Model
     }
 
     /**
-     * Estaciones de la linea en orden de recorrido (tabla linea_estacion).
+     * Estaciones de la línea en orden de recorrido (tabla linea_estacion).
      */
     public function estaciones(): BelongsToMany
     {

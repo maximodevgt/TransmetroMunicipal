@@ -13,10 +13,8 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Datos de las gráficas del panel. Cada gráfica sale de la consulta de su reporte, así los números
- * y el alcance del operador son los mismos que verá al hacer clic (cada punto lleva al reporte filtrado).
- *
- * Formato de cada gráfica: tipo, etiquetas, series [{nombre, datos, enlaces}], vacio (mensaje sin datos).
+ * Gráficas del panel. Cada una usa la consulta de su reporte, así coincide con el reporte filtrado al que lleva.
+ * Formato: tipo, etiquetas, series [{nombre, datos, enlaces}] y vacio (mensaje sin datos).
  */
 class GraficasService
 {

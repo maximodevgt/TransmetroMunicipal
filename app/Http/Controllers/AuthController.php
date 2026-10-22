@@ -23,9 +23,7 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        // Solo usuarios activos pueden iniciar sesión. Con "Recordarme" Laravel deja la cookie remember_web
-        // (30 días, config/auth.php): vuelve a entrar aunque la sesión haya vencido. Un usuario desactivado
-        // queda fuera igual (middleware "activo") y al cerrar sesión la cookie se borra.
+        // Solo entran usuarios activos. "Recordarme" dura 30 días (config/auth.php).
         if (! Auth::attempt([...$credenciales, 'activo' => 1], $request->boolean('remember'))) {
             // Con la contraseña correcta se avisa que el usuario está desactivado; si no, solo que no son válidas.
             $desactivado = Auth::validate($credenciales) && ! User::where('email', $credenciales['email'])->value('activo');

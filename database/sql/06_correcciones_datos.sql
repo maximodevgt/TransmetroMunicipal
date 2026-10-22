@@ -1,14 +1,9 @@
 -- =====================================================================
 -- 06. Correcciones de datos: tildes en los textos del script inicial
--- MySQL 8.0 · Base transmetro · Idempotente (se puede ejecutar varias veces)
+-- MySQL 8.0 · Base transmetro · Idempotente · Solo para bases creadas con una versión anterior de 01
 --
--- Solo cambia textos que todavía están sin tilde; si ya se corrigieron, no hace nada.
--- La bitácora NO se toca: es un registro de auditoría y sus filas no se editan.
--- 01_transmetro.sql ya trae estos textos corregidos (este script es para bases creadas antes).
---
--- Compatible con el "modo de actualización segura" de MySQL Workbench: cada UPDATE filtra por la
--- llave (id > 0). La comparación usa utf8mb4_bin porque la intercalación de la base no distingue
--- tildes: así, en una segunda ejecución no cambia ninguna fila.
+-- La bitácora no se toca. Cada UPDATE filtra por id (modo de actualización segura de Workbench)
+-- y compara con utf8mb4_bin, porque la intercalación de la base no distingue tildes.
 -- =====================================================================
 USE transmetro;
 

@@ -32,7 +32,7 @@
             </div>
         </form>
 
-        {{-- Cupo por linea: maximo = estaciones x 2 (lo valida el trigger) --}}
+        {{-- Cupo por línea: máximo = estaciones × 2 (lo valida el trigger) --}}
         <aside class="tarjeta p-5">
             <h2 class="font-semibold text-celeste-900">Cupo por línea</h2>
             <p class="mt-1 text-xs text-slate-500">Máximo permitido: estaciones × 2.</p>

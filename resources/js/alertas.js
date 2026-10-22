@@ -24,7 +24,7 @@ function guardar(almacen, clave, valor) {
     }
 }
 
-// Sonido corto generado con Web Audio (sin archivos). Desactivado por defecto.
+// Sonido corto hecho con Web Audio (sin archivos). Desactivado por defecto.
 let audio = null;
 
 function sonidoActivo() {

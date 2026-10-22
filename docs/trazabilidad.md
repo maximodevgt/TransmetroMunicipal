@@ -3,13 +3,13 @@
 Relación de cada requisito del documento de requerimientos (E2, 04/09/2026), con su texto tal como aparece en ese documento, la pantalla o ruta donde se cumple, el archivo principal que lo implementa, la prueba automatizada que lo verifica y el criterio de aceptación y los casos del plan de pruebas (E7, 17/10/2026). Los resultados de la ejecución del plan están en [`resultados_pruebas.md`](resultados_pruebas.md).
 
 - Pruebas en `tests/Feature/` (y `tests/Unit/`); se ejecutan con `php artisan test`.
-- **Estado**: ✅ cumple · 🔧 se completó en la revisión final, con su prueba.
+- **Estado**: ✅ cumple · 🔧 se completó en la etapa de cierre, con su prueba.
 - El operador solo ve y opera lo de su estación; esto aplica a casi todos los módulos y se verifica en `SeguridadTest`.
 - Cada caso del plan de pruebas (CP-01 a CP-50) tiene su prueba en `PlanDePruebasTest` (`test_cp_XX_...`), con los datos del plan.
 
 ## Resumen
 
-| Grupo | Total | ✅ Cumple | 🔧 Completado en la revisión final |
+| Grupo | Total | ✅ Cumple | 🔧 Completado en la etapa de cierre |
 |---|---|---|---|
 | Requerimientos funcionales (RF) | 16 | 13 | 3 (RF-02, RF-03, RF-09) |
 | Requerimientos no funcionales (RNF) | 7 | 7 | — (RNF-01 y RNF-03 reforzados) |

@@ -6,7 +6,6 @@ use Tests\TestCase;
 
 /**
  * Menú lateral en pantallas bajas: solo la lista de enlaces se desplaza; el logo y "Cerrar sesión" quedan fijos.
- * (La medición real a 1366×768, 1920×1080, 125 % de zoom y teléfono se hizo en el navegador.)
  */
 class MenuLateralTest extends TestCase
 {

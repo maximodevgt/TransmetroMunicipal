@@ -4,7 +4,6 @@
  * Parámetros de la Tarjeta Transmetro. Todo pago es SIMULADO: no hay pasarela real.
  */
 return [
-
     // Pasaje que cobra el torniquete (tarifa pública del Transmetro).
     'pasaje' => (float) env('TRANSMETRO_PASAJE', 1.00),
 
@@ -23,5 +22,4 @@ return [
             '4000000000000069' => 'Tarjeta vencida',
         ],
     ],
-
 ];

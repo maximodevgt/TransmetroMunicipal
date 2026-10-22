@@ -15,15 +15,9 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Simulador de la operación para la demostración del mapa.
- *
- * Mueve los recorridos en curso estación por estación usando RecorridoService y AlertaService
- * (las llegadas, alertas y pasajeros en espera son registros reales). El horario de cada bus
- * (de qué estación sale, hacia cuál va y a qué hora) vive en caché: no hay tablas nuevas.
- * El tiempo está acelerado: un kilómetro toma unos segundos.
- *
- * Avanza con avanzar(): lo llama en bucle el comando transmetro:simular y, mientras el mapa está
- * abierto, la página de seguimiento cada 3 segundos.
+ * Simulador de la operación para el mapa. Las llegadas, alertas y pasajeros en espera son registros
+ * reales (RecorridoService y AlertaService); el horario de cada bus se guarda en caché, a tiempo acelerado.
+ * Lo avanzan el comando transmetro:simular y la página de seguimiento mientras está abierta.
  */
 class SimuladorService
 {

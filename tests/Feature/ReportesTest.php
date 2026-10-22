@@ -260,7 +260,7 @@ class ReportesTest extends TestCase
     public function test_el_endpoint_de_graficas_devuelve_el_formato_esperado(): void
     {
         $respuesta = $this->actingAs($this->administrador())->getJson(route('panel.graficas'))->assertOk()
-            ->assertJsonStructure(['generado', 'graficas' => [
+            ->assertJsonStructure(['actualizado', 'graficas' => [
                 'espera', 'recorridos_hoy', 'alertas_semana', 'recaudacion_semana', 'ocupacion_lineas',
             ]]);
 

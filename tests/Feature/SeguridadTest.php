@@ -20,7 +20,7 @@ use Tests\Feature\Concerns\ConRecorridos;
 use Tests\TestCase;
 
 /**
- * Revisión de seguridad (RNF-01, RNF-02): sesión, roles, alcance del operador, CSRF, validaciones,
+ * Seguridad (RNF-01, RNF-02): sesión, roles, alcance del operador, CSRF, validaciones,
  * XSS, inyección SQL, contraseñas, límite de intentos, vencimiento de la sesión y "Recordarme".
  */
 class SeguridadTest extends TestCase

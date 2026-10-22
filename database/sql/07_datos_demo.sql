@@ -1,24 +1,13 @@
 -- =====================================================================
--- 07. Datos de demostración: historial realista de los últimos 7 días
--- MySQL 8.0 · Base transmetro · Ejecutar después de 01 (y 06 si la base es anterior)
+-- 07. Datos de demostración: historial de los últimos 7 días (fechas relativas a NOW())
+-- MySQL 8.0 · Base transmetro · Ejecutar después de 01
 --
--- Genera, con fechas relativas a NOW():
---   * Recorridos finalizados por línea en horas pico (06:00-07:30 y 17:00-18:30) y uno al mediodía,
---     con sus llegadas a cada estación, pasajeros a bordo y la espera de 5 minutos por baja ocupación.
---   * Pasajeros en espera en todas las estaciones (mañana y tarde) y algunos picos de alta demanda.
---   * Alertas de alta demanda y baja ocupación atendidas, las de hoy activas y una incidencia activa.
---   * 20 pasajeros con tarjeta (TM-000101 a TM-000120), recargas en efectivo y en línea (aprobadas y
---     rechazadas) y pasajes. Los intentos de TM-000005 y TM-000006 quedan rechazados.
---   * Cierra los recorridos "en curso" del script inicial que llevan más de un día abiertos.
+-- Carga recorridos en horas pico con sus llegadas, pasajeros en espera, alertas, 20 tarjetas
+-- (TM-000101 a TM-000120) con recargas y pasajes, y cierra los recorridos viejos del script inicial.
 --
--- Reglas que respeta:
---   * El saldo lo calculan los triggers: solo se insertan transacciones, en orden cronológico,
---     y cada tarjeta nueva empieza con una recarga que cubre todos sus pasajes.
---   * Pagos SIMULADOS: solo marca, últimos 4 dígitos y una referencia inventada.
---   * Idempotente: deja una marca en la bitácora ('cargar_datos_demo') y, si ya existe, no hace nada.
---   * Todo en una transacción: si algo falla, no queda nada a medias. Sin procedimientos ni DDL
---     (solo una tabla temporal, que no confirma la transacción).
---   * Compatible con el "modo de actualización segura" de MySQL Workbench (los UPDATE filtran por id).
+-- El saldo lo calculan los triggers: las transacciones se insertan en orden cronológico.
+-- Idempotente: deja la marca 'cargar_datos_demo' en la bitácora y, si ya existe, no hace nada.
+-- Todo va en una transacción y funciona con el modo de actualización segura de Workbench.
 -- =====================================================================
 USE transmetro;
 

@@ -4,7 +4,7 @@
     'tipo' => 'text',
     'valor' => null,
     'opciones' => null, // [valor => texto] para tipo "select"
-    'vacio' => null,    // texto de la opcion vacia en un select
+    'vacio' => null,    // texto de la opción vacía en un select
     'ayuda' => null,
 ])
 

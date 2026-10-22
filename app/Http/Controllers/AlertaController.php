@@ -39,7 +39,6 @@ class AlertaController extends Controller
             ->when(ctype_digit((string) ($filtros['estacion_id'] ?? '')), fn ($q) => $q->where('estacion_id', $filtros['estacion_id']))
             ->when($periodo === 'hoy', fn ($q) => $q->where($columnaFecha, '>=', today()))
             ->when($periodo === '7dias', fn ($q) => $q->where($columnaFecha, '>=', today()->subDays(6)))
-            // Primero las activas, luego las más recientes.
             ->orderByRaw("estado = 'activa' desc")
             ->orderByDesc('id')
             ->paginate(15)

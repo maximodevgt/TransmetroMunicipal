@@ -18,8 +18,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class ReporteController extends Controller
 {
     /**
-     * Separador del CSV: punto y coma, el separador de listas de Windows en español (es-GT).
-     * Con coma, Excel en español deja cada fila en una sola columna. Los decimales van con punto, como en es-GT.
+     * Punto y coma: con coma, Excel en español deja cada fila en una sola columna.
      */
     public const SEPARADOR_CSV = ';';
 
@@ -56,7 +55,7 @@ class ReporteController extends Controller
             ...$this->datos($reporte, $filtros, $usuario),
             // Las filas se leen por partes de 500 mientras se dibuja la tabla (no se cargan todas en memoria).
             'filas' => $reporte->consulta($filtros, $usuario)->lazy(500)->map(fn ($fila) => $reporte->preparar($fila)),
-            'generado' => now(),
+            'emitido' => now(),
         ])->render();
         $this->anotar('imprimir_reporte', 'para imprimir', $reporte, $filtros, $usuario);
 

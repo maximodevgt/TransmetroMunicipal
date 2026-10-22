@@ -10,11 +10,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Un reporte: sus filtros, una consulta agregada en SQL (sin N+1), los totales y, si aplica,
- * un resumen agrupado. La misma consulta alimenta la pantalla (paginada), la impresión y el CSV,
- * así los totales siempre cuadran con la tabla.
- *
- * Tipos de columna: texto, numero, dinero, km, porcentaje, minutos, fecha, dia y estado.
+ * Base de los reportes. Una sola consulta agregada alimenta la pantalla, la impresión y el CSV,
+ * así los totales cuadran con la tabla. Tipos de columna: texto, numero, dinero, km, porcentaje, minutos, fecha, dia y estado.
  */
 abstract class Reporte
 {

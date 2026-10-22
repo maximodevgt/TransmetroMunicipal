@@ -8,7 +8,7 @@ use Illuminate\Http\RedirectResponse;
 abstract class Controller
 {
     /**
-     * Convierte un error de MySQL (trigger, llave foranea, duplicado o CHECK) en un mensaje para el usuario.
+     * Convierte un error de MySQL (trigger, llave foránea, duplicado o CHECK) en un mensaje para el usuario.
      */
     protected function mensajeErrorBd(QueryException $e): string
     {

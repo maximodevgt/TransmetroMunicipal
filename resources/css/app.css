@@ -67,8 +67,7 @@
         @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
     }
 
-    /* relative: los textos sr-only (absolutos) de la tabla quedan dentro de su contenedor con desplazamiento
-       horizontal; sin esto se salían y ensanchaban la página en el teléfono. */
+    /* relative: sin esto, los textos sr-only ensanchan la página en el teléfono. */
     .tabla {
         @apply relative w-full text-left text-sm;
     }

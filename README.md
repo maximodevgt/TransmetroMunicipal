@@ -32,7 +32,7 @@ Autor: **Maximiliano Ajca Us**.
 | **Recorridos** | Iniciar y finalizar recorridos; registrar llegadas con pasajeros a bordo; distancia recorrida. | Administrador inicia y finaliza; el operador registra llegadas en su estación |
 | **Alertas** | Alta demanda (≥ 150 % de la capacidad de referencia), baja ocupación (< 25 %: 5 minutos de espera), insuficiencia de unidades e incidencias; resolver o atender con nota. | Ambos (el operador, las de su estación) |
 | **Mi estación** | Pasajeros en espera, buses que llegan y alertas de la estación del operador. | Operador |
-| **Tarjetas** | Emisión, bloqueo y desbloqueo con motivo; detalle con movimientos. | Ambos |
+| **Tarjetas** | Emisión y cambio de estado (activa, bloqueada, suspendida) con motivo; detalle con movimientos. | Ambos consultan; el administrador emite y cambia el estado |
 | **Recargas** | En efectivo en ventanilla (operador) y en línea con pasarela **simulada** (marca, Luhn, tarjetas de prueba). | Ambos |
 | **Cobro de pasaje** | Simula el paso del pasajero por el torniquete de un acceso. | Ambos (el operador, en su estación) |
 | **Movimientos** | Recargas y pasajes con comprobante imprimible. | Ambos |

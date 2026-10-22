@@ -22,10 +22,8 @@ use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 /**
- * Casos de prueba CP-01 a CP-50 del plan de pruebas (E7, sección 15.9), con los pasos y los datos
- * del plan. Los datos son los iniciales del script; cuando la base de desarrollo ya no los tiene
- * (por ejemplo, un saldo), la prueba los prepara dentro de su transacción, que se revierte al terminar.
- * CP-46 y CP-48 se completan en el navegador (tiempos y compatibilidad): ver docs/resultados_pruebas.md.
+ * Casos CP-01 a CP-50 del plan de pruebas (E7, sección 15.9) con sus pasos y datos. Si la base ya no tiene
+ * un dato inicial (por ejemplo, un saldo), la prueba lo prepara dentro de su transacción.
  */
 class PlanDePruebasTest extends TestCase
 {

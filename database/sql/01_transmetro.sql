@@ -4,14 +4,14 @@
 -- Autor: Maximiliano Ajca Us
 --
 -- Contenido:
---   PARTE 1. Base de datos y tablas (19)
---   PARTE 2. Vista de resumen por línea
---   PARTE 3. Triggers de reglas de negocio (4)
---   PARTE 4. Datos iniciales
+--   SECCIÓN 1. Base de datos y tablas (19)
+--   SECCIÓN 2. Vista de resumen por línea
+--   SECCIÓN 3. Triggers de reglas de negocio (4)
+--   SECCIÓN 4. Datos iniciales
 -- =====================================================================
 
 -- =====================================================================
--- PARTE 1. BASE DE DATOS Y TABLAS
+-- SECCIÓN 1. BASE DE DATOS Y TABLAS
 -- =====================================================================
 DROP DATABASE IF EXISTS transmetro;
 CREATE DATABASE transmetro CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -75,7 +75,7 @@ CREATE TABLE pasajeros (
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
--- Tabla 5. Lineas
+-- Tabla 5. Líneas
 -- ---------------------------------------------------------------------
 CREATE TABLE lineas (
   id               BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -182,7 +182,7 @@ CREATE TABLE users (
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
--- Tabla 11. Buses (linea opcional, parqueo obligatorio)
+-- Tabla 11. Buses (línea opcional, parqueo obligatorio)
 -- ---------------------------------------------------------------------
 CREATE TABLE buses (
   id               BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -263,7 +263,7 @@ CREATE TABLE recorrido_estaciones (
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
--- Tabla 15. Registro de pasajeros en espera por estacion
+-- Tabla 15. Registro de pasajeros en espera por estación
 -- ---------------------------------------------------------------------
 CREATE TABLE registros_pasajeros (
   id            BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -358,7 +358,7 @@ CREATE TABLE transacciones (
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------
--- Tabla 19. Bitacora de operaciones
+-- Tabla 19. Bitácora de operaciones
 -- ---------------------------------------------------------------------
 CREATE TABLE bitacora (
   id          BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -374,7 +374,7 @@ CREATE TABLE bitacora (
 ) ENGINE=InnoDB;
 
 -- =====================================================================
--- PARTE 2. VISTA DE RESUMEN POR LÍNEA
+-- SECCIÓN 2. VISTA DE RESUMEN POR LÍNEA
 -- Estaciones, distancia total, buses asignados, mínimo y máximo
 -- =====================================================================
 CREATE OR REPLACE VIEW vw_resumen_lineas AS
@@ -391,11 +391,11 @@ SELECT
 FROM lineas l;
 
 -- =====================================================================
--- PARTE 3. TRIGGERS DE REGLAS DE NEGOCIO
+-- SECCIÓN 3. TRIGGERS DE REGLAS DE NEGOCIO
 -- =====================================================================
 DELIMITER $$
 
--- Maximo de buses por linea = estaciones x 2 (al registrar un bus)
+-- Máximo de buses por línea = estaciones × 2 (al registrar un bus)
 CREATE TRIGGER trg_buses_max_insert
 BEFORE INSERT ON buses
 FOR EACH ROW
@@ -412,7 +412,7 @@ BEGIN
   END IF;
 END$$
 
--- Maximo de buses por linea = estaciones x 2 (al reasignar un bus)
+-- Máximo de buses por línea = estaciones × 2 (al reasignar un bus)
 CREATE TRIGGER trg_buses_max_update
 BEFORE UPDATE ON buses
 FOR EACH ROW
@@ -429,7 +429,7 @@ BEGIN
   END IF;
 END$$
 
--- Validar tarjeta activa y saldo antes de registrar la transaccion
+-- Validar tarjeta activa y saldo antes de registrar la transacción
 CREATE TRIGGER trg_transacciones_validar
 BEFORE INSERT ON transacciones
 FOR EACH ROW
@@ -458,7 +458,7 @@ BEGIN
   END IF;
 END$$
 
--- Actualizar el saldo de la tarjeta al aprobar la transaccion
+-- Actualizar el saldo de la tarjeta al aprobar la transacción
 CREATE TRIGGER trg_transacciones_saldo
 AFTER INSERT ON transacciones
 FOR EACH ROW
@@ -471,7 +471,7 @@ END$$
 DELIMITER ;
 
 -- =====================================================================
--- PARTE 4. DATOS INICIALES
+-- SECCIÓN 4. DATOS INICIALES
 -- Líneas, estaciones y tarifa (Q1.00): datos públicos del Transmetro.
 -- Distancias entre estaciones: aproximadas.
 -- Personas, placas, parqueos y tarjetas: datos de ejemplo.
