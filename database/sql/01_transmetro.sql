@@ -16,6 +16,8 @@
 DROP DATABASE IF EXISTS transmetro;
 CREATE DATABASE transmetro CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE transmetro;
+-- Hora de Guatemala para NOW() aunque el servidor de MySQL esté en UTC.
+SET time_zone = '-06:00';
 
 -- ---------------------------------------------------------------------
 -- Tabla 1. Municipalidades

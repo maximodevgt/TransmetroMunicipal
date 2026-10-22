@@ -1,0 +1,12 @@
+{
+	frankenphp
+	admin off
+	# El HTTPS lo atiende el proxy de Railway; aquí solo HTTP en el puerto que asigna.
+	auto_https off
+}
+
+:{$PORT:8080} {
+	root * /app/public
+	encode zstd br gzip
+	php_server
+}

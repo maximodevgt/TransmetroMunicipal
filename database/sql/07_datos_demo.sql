@@ -10,6 +10,8 @@
 -- Todo va en una transacción y funciona con el modo de actualización segura de Workbench.
 -- =====================================================================
 USE transmetro;
+-- Hora de Guatemala para NOW() aunque el servidor de MySQL esté en UTC.
+SET time_zone = '-06:00';
 
 SET @ahora := NOW();
 -- Marca de las filas de esta carga (updated_at); created_at lleva la fecha "real" del dato.

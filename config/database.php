@@ -35,6 +35,8 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
+            // Hora de Guatemala para NOW() y los triggers aunque el servidor esté en UTC.
+            'timezone' => env('DB_TIMEZONE', '-06:00'),
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],

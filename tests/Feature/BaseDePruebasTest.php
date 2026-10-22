@@ -18,6 +18,14 @@ class BaseDePruebasTest extends TestCase
         $this->assertSame('transmetro', DB::connection()->getDatabaseName());
     }
 
+    public function test_la_conexion_usa_la_hora_de_guatemala_aunque_el_servidor_este_en_utc(): void
+    {
+        $hora = DB::selectOne('SELECT @@session.time_zone AS zona, TIMESTAMPDIFF(HOUR, UTC_TIMESTAMP(), NOW()) AS diferencia');
+
+        $this->assertSame('-06:00', $hora->zona);
+        $this->assertEquals(-6, $hora->diferencia);
+    }
+
     public function test_existen_las_19_tablas_y_la_vista(): void
     {
         $tablas = DB::table('information_schema.TABLES')

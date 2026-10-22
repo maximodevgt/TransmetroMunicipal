@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -13,6 +14,10 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if ($this->app->isProduction()) {
+            URL::forceScheme('https');
+        }
+
         // Consulta pública de saldo: 5 intentos por minuto por IP, para que no se adivinen códigos o DPI.
         RateLimiter::for('consulta-saldo', fn (Request $request) => Limit::perMinute(5)->by($request->ip())
             ->response(fn (Request $request, array $headers) => response()

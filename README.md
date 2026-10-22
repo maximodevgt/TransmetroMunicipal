@@ -71,6 +71,36 @@ php artisan test
 vendor/bin/pint --test
 ```
 
+## Despliegue en Railway
+
+El repositorio trae `Dockerfile` y `railway.json`: Railway construye la imagen (PHP 8.3 con FrankenPHP, dependencias sin las de desarrollo y recursos compilados) y al iniciar genera las cachés con `php artisan optimize`. El HTTPS lo da Railway.
+
+1. Crear un proyecto con un servicio **MySQL** y un servicio desde este repositorio (rama a desplegar).
+2. En el servicio de MySQL, con los datos de *Public Networking*, conectarse desde MySQL Workbench y ejecutar `01_transmetro.sql` y, si se quieren datos de ejemplo, `07_datos_demo.sql`.
+3. En el servicio de la aplicación, definir las variables y generar un dominio en *Networking*:
+
+   | Variable | Valor |
+   |---|---|
+   | `APP_NAME` | `Transmetro` |
+   | `APP_ENV` | `production` |
+   | `APP_KEY` | resultado de `php artisan key:generate --show` |
+   | `APP_DEBUG` | `false` |
+   | `APP_URL` | `https://` + el dominio de Railway |
+   | `APP_LOCALE` | `es` |
+   | `LOG_CHANNEL` | `stderr` |
+   | `DB_CONNECTION` | `mysql` |
+   | `DB_HOST` | `${{MySQL.MYSQLHOST}}` |
+   | `DB_PORT` | `${{MySQL.MYSQLPORT}}` |
+   | `DB_DATABASE` | `transmetro` |
+   | `DB_USERNAME` | `${{MySQL.MYSQLUSER}}` |
+   | `DB_PASSWORD` | `${{MySQL.MYSQLPASSWORD}}` |
+   | `SESSION_DRIVER` | `file` |
+   | `SESSION_SECURE_COOKIE` | `true` |
+   | `CACHE_STORE` | `file` |
+   | `QUEUE_CONNECTION` | `sync` |
+
+La conexión usa la hora de Guatemala (`-06:00`) aunque el servidor esté en UTC. En producción el simulador del mapa se usa con el botón **Iniciar simulación**.
+
 ## Autor
 
 Maximiliano Ajca Us · Aseguramiento de la Calidad de Software · Universidad Mariano Gálvez de Guatemala · 2026
